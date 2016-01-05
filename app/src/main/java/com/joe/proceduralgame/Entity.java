@@ -2,6 +2,7 @@ package com.joe.proceduralgame;
 
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
+
 public abstract class Entity {
 	public float posx, posz;
 	public int gridRow, gridCol;

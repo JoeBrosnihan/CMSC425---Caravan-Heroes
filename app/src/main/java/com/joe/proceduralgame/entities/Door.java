@@ -1,7 +1,12 @@
-package com.joe.proceduralgame;
+package com.joe.proceduralgame.entities;
 
 import android.opengl.Matrix;
 
+import com.joe.proceduralgame.DungeonRenderer;
+import com.joe.proceduralgame.EdgeEntity;
+import com.joe.proceduralgame.Quad;
+import com.joe.proceduralgame.R;
+import com.joe.proceduralgame.TextureManager;
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class Door extends EdgeEntity {

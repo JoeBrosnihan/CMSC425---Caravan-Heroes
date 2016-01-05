@@ -1,11 +1,12 @@
-package com.joe.proceduralgame;
+package com.joe.proceduralgame.entities.characters;
 
 import android.opengl.GLES20;
 
+import com.joe.proceduralgame.*;
 import com.joe.proceduralgame.Quad.Type;
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
-public class Swordsman extends Character {
+public class Swordsman extends com.joe.proceduralgame.Character {
 	
 	private final int nCol = 8;
 

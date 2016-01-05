@@ -1,5 +1,7 @@
-package com.joe.proceduralgame;
+package com.joe.proceduralgame.entities;
 
+import com.joe.proceduralgame.Entity;
+import com.joe.proceduralgame.TextureManager;
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class SolidBlock extends Entity {

@@ -3,6 +3,8 @@ package com.joe.proceduralgame;
 import java.util.Random;
 
 import com.joe.proceduralgame.Quad.Type;
+import com.joe.proceduralgame.entities.Door;
+import com.joe.proceduralgame.entities.SolidBlock;
 
 import android.opengl.Matrix;
 

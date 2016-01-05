@@ -15,7 +15,7 @@ public abstract class Character extends Entity {
 	public int state = 0;
 	public long stateStartTime;
 	
-	Quad quad;
+	public Quad quad;
 	
 	public Character() {
 		super();
