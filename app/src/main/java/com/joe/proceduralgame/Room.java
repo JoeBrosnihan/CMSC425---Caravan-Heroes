@@ -1,0 +1,260 @@
+package com.joe.proceduralgame;
+
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import android.opengl.GLES20;
+import android.opengl.Matrix;
+
+import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
+
+public class Room {
+
+	public RoomGenerator generator;
+	/**
+	 * Entities should only be added to the grid through addEntity(). Their position on the grid
+	 * can be changed by calling moveEntity().
+	 */
+	Entity[][] grid;
+	EdgeEntity[] edges;
+	int width, length;
+	int originx, originz;
+	List<Quad> quads = new ArrayList<Quad>();
+	List<Character> characters = new ArrayList<Character>();
+	List<Entity> entities = new ArrayList<Entity>();
+	List<EdgeEntity> edgeEntities = new ArrayList<EdgeEntity>();
+
+	// static geometry
+	// sorted first by texture then by uv patch
+	float[][] quadModels; // model matrix of each quad
+	int[] textureIndices; // indices for change of texture
+	int[] uvIndices; // indices for change of uv patch
+	int[] textures; // texture units for each texture index
+	float[][] uvOrigins; // {u, v} origin for each uv index
+	float[][] uvScales; // size of patch on texture for each uv index
+	
+	public void update(float dt) {
+		//TODO update all entities?
+		for (Character c : characters) {
+			c.move(dt);
+		}
+	}
+	
+	public void moveEntity(Entity entity, int fromRow, int fromCol) {
+		// XXX What if a team member moves through a team member?
+		assert grid[fromRow][fromCol] == entity;
+		assert grid[entity.gridRow][entity.gridCol] == null;
+		grid[fromRow][fromCol] = null;
+		grid[entity.gridRow][entity.gridCol] = entity;
+	}
+	
+	/**
+	 * Places entity on the grid, adds it to the room's entities, sets entity.currentRoom to this Room.
+	 * The entity must have already been positioned to not overlap anything. 
+	 * @param entity
+	 */
+	public void addEntity(Entity entity) {
+		entity.gridRow = Math.round(entity.posz - originz);
+		entity.gridCol = Math.round(entity.posx - originx);
+		assert grid[entity.gridRow][entity.gridCol] == null;
+		grid[entity.gridRow][entity.gridCol] = entity;
+		entities.add(entity); //TODO handle synchronous array operations. Sycn the array, use CopyableArray, or something else.
+		entity.currentRoom = this;
+	}
+	
+	/**
+	 * Places entity on the approriate edge, adds it to the room's edgeEntities, sets entity.currentRoom to this Room.
+	 * The entity must have already been positioned to not overlap anything. 
+	 * @param entity
+	 */
+	public void addEdgeEntity(EdgeEntity entity) {
+		int index;
+		if (entity.dir % 2 == 0)
+			index = (int) Math.round((2 * width + 1) * (entity.posz - originz) + width + entity.posx - originx + .5);
+		else
+			index = Math.round((2 * width + 1) * (entity.posz - originz + .5f) + entity.posx - originx);
+		entity.edgesIndex = index;
+		
+		assert edges[index] == null;
+		edges[index] = entity;
+		edgeEntities.add(entity); //TODO handle synchronous array operations. Sycn the array, use CopyableArray, or something else.
+		entity.currentRoom = this;
+	}
+	
+	/**
+	 * Returns the edge index corresponding to the given position.
+	 * @param posx
+	 * @param posz
+	 * @return
+	 */
+	public int edgeIndexAt(float posx, float posz) {
+		float relx = posx - originx;
+		float relz = posz - originz;
+		if (relx % 1 > .25f && relx % 1 < .75f) // dir = 0
+			return (int) Math.round((2 * width + 1) * (posz - originz) + width + posx - originx + .5);
+		else
+			return Math.round((2 * width + 1) * (posz - originz + .5f) + posx - originx);
+	}
+	
+	public void addCharacter(Character c) {
+		characters.add(c);
+		addEntity(c);
+	}
+	
+	public void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion { //TODO unload rooms
+		generator.load(this);
+		DungeonRenderer.catchGLError();
+		loadStaticGeometry(tex);
+		DungeonRenderer.catchGLError();
+		for (Entity e : entities) {
+			e.graphicLoad(tex);
+			DungeonRenderer.catchGLError();
+		}
+		for (EdgeEntity e : edgeEntities) {
+			e.load(tex);
+			DungeonRenderer.catchGLError();
+		}
+		return;
+	}
+	
+	private int hashUV(float[] uv) {
+		return (int) (1000 * (uv[0] + 1000 * uv[1]));
+	}
+	
+	private void loadStaticGeometry(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
+		if(quads.isEmpty()) {
+			//initialize
+			return;
+		}
+		
+		// sort quads first by texture, then by uv patch within a texture
+		Collections.sort(quads, new Comparator<Quad>() {
+			public int compare(Quad lhs, Quad rhs) {
+				int comp = lhs.textureID - rhs.textureID;
+				if (comp != 0) {
+					return comp;
+				} else {
+					return hashUV(lhs.uvOrigin) - hashUV(rhs.uvOrigin);
+				}
+			}
+		});
+		
+		int currentTextureID = -1;
+		int currentUVHash = -1;
+		// set not equal for convenience
+		currentTextureID = quads.get(0).textureID - 1;
+		currentUVHash = hashUV(quads.get(0).uvOrigin) - 1;
+			
+		//count size for tex and uv arrays
+		int nUniqueTextures = 0;
+		int nUniqueUVs = 0;
+		for (int i = 0; i < quads.size(); i++) {
+			Quad q = quads.get(i);
+			if (q.textureID != currentTextureID) {
+				nUniqueTextures++;
+				currentTextureID = q.textureID;
+			}
+			if (hashUV(q.uvOrigin) != currentUVHash) {
+				nUniqueUVs++;
+				currentUVHash = hashUV(q.uvOrigin);
+			}
+		}
+		quadModels = new float[quads.size()][16];
+		textureIndices = new int[nUniqueTextures];
+		uvIndices = new int[nUniqueUVs];
+		textures = new int[nUniqueTextures];
+		uvOrigins = new float[nUniqueUVs][2];
+		uvScales = new float[nUniqueUVs][2];
+		
+		// set not equal to the first element for convenience
+		currentTextureID = quads.get(0).textureID - 1;
+		currentUVHash = hashUV(quads.get(0).uvOrigin) - 1;
+		
+		// current slots in index arrays
+		int iTex = -1;
+		int iUV = -1;
+		for (int i = 0; i < quads.size(); i++) {
+			Quad q = quads.get(i);
+			// copy model matrix
+			quadModels[i] = q.modelMatrix;
+			
+			if (q.textureID != currentTextureID) {
+				iTex++;
+				currentTextureID = q.textureID;
+				textures[iTex] = tex.referenceLoad(currentTextureID);
+				textureIndices[iTex] = i;
+			}
+			
+			if (hashUV(q.uvOrigin) != currentUVHash) {
+				iUV++;
+				currentUVHash = hashUV(q.uvOrigin);
+				uvOrigins[iUV] = q.uvOrigin;
+				uvScales[iUV] = q.uvScale; // assume square
+				uvIndices[iUV] = i;
+			}
+			
+		}
+		
+	}
+
+	/**
+	 * Draws only the static geometry of the room. No Entities.
+	 * @param shaderProgram
+	 * @param mVPMatrix
+	 * @param vertexBuffer
+	 */
+	public void draw(int shaderProgram, float[] mVPMatrix, FloatBuffer vertexBuffer) {
+		int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "vPosition");
+		int texCoordsHandle = GLES20.glGetAttribLocation(shaderProgram, "vTexCoords");
+		int modelHandle = GLES20.glGetUniformLocation(shaderProgram, "modelMatrix");
+		int mvpHandle = GLES20.glGetUniformLocation(shaderProgram, "MVP");
+		int textureHandle = GLES20.glGetUniformLocation(shaderProgram, "uTexture");
+		int originHandle = GLES20.glGetUniformLocation(shaderProgram, "uvOrigin");
+		int scaleHandle = GLES20.glGetUniformLocation(shaderProgram, "uvScale");
+		
+		int iTex = 0;
+		int iUV = 0;
+		int textureChangeIndex = textureIndices[iTex];
+		int uvChangeIndex = uvIndices[iUV];
+		
+		float[] mvp = new float[16];
+		for (int i = 0; i < quadModels.length; i++) {
+			Quad.enableArrays(shaderProgram);
+			
+			// change quad model matrix
+			Matrix.multiplyMM(mvp, 0, mVPMatrix, 0, quadModels[i], 0);
+			GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvp, 0);
+			GLES20.glUniformMatrix4fv(modelHandle, 1, false, quadModels[i], 0);
+			
+			if (i == textureChangeIndex) {
+				// change texture
+				GLES20.glUniform1i(textureHandle, textures[iTex]);
+				
+				iTex++;
+				if (iTex < textureIndices.length)
+					textureChangeIndex = textureIndices[iTex];
+			}
+			if (i == uvChangeIndex) {
+				// change uv
+				GLES20.glUniform2f(originHandle, uvOrigins[iUV][0], uvOrigins[iUV][1]);
+				GLES20.glUniform2f(scaleHandle, uvScales[iUV][0], uvScales[iUV][1]);
+				
+				iUV++;
+				if (iUV < uvIndices.length)
+					uvChangeIndex = uvIndices[iUV];
+			}
+
+			//draw
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
+			Quad.disableArrays(shaderProgram);
+		}
+	}
+
+	public void destroy() {
+
+	}
+
+}
