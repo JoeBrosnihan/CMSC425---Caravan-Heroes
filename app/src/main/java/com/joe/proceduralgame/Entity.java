@@ -8,7 +8,10 @@ public abstract class Entity {
 	public int gridRow, gridCol;
 	public Room currentRoom;
 	public boolean graphicLoaded = false;
-	
+
+	/** The default action performed when the player clicks on this object */
+	private Action defaultAction = null;
+
 	public void setPosition(float x, float z) {
 		posx = x;
 		posz = z;
@@ -29,8 +32,14 @@ public abstract class Entity {
 			graphicLoaded = true;
 		}
 	}
-	
+
+	public Action getDefaultAction() {
+		return defaultAction;
+	}
+
 	protected abstract void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion;
 	public abstract void draw(int shaderProgram, float[] mVPMatrix);
+	/**Returns true iff the quad belongs to this entity.*/
+	public abstract boolean ownsQuad(Quad quad);
 
 }

@@ -11,11 +11,21 @@ public class RaycastUtils {
 		Quad quad;
 		float x, y, z;
 	}
-	
+
+	/** Returns the character in the room that owns the quad */
 	public static Character quadToCharacter(Room room, Quad quad) {
 		for (Character c : room.characters) {
-			if (c.quad.equals(quad))
+			if (c.ownsQuad(quad))
 				return c;
+		}
+		return null;
+	}
+
+	/** Returns the entity of the room's entities that owns the quad */
+	public static Entity quadToEntity(Room room, Quad quad) {
+		for (Entity e : room.entities) {
+			if (e.ownsQuad(quad))
+				return e;
 		}
 		return null;
 	}

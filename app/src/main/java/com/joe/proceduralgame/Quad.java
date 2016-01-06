@@ -10,7 +10,7 @@ import android.util.Log;
 
 public class Quad {
 	
-	public static enum Type {FLOOR, WALL, DECORATION, CHARACTER, DOOR};
+	public static enum Type {FLOOR, WALL, DECORATION, CHARACTER, NONCHARACTER_ENTITY, DOOR};
 
 	public float[] modelMatrix;
 	public int textureUnit;

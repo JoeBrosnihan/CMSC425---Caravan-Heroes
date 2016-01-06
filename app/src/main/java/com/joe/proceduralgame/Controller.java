@@ -31,13 +31,32 @@ public class Controller {
 				float nearY = (-e.getY() / view.getHeight() + .5f) * renderer.nearHeight;
 				Quad targetQuad = RaycastUtils.pick(room, renderer.mViewMatrix, nearX, nearY);
 				if (targetQuad != null) {
-					if (targetQuad.type == Type.CHARACTER) {
-						Character character = RaycastUtils.quadToCharacter(manager.currentRoom, targetQuad);
-						if (character.isPlayerSelectable()) {
-							selectedCharacter = character;
+					if (targetQuad.type == Type.CHARACTER || targetQuad.type == Type.NONCHARACTER_ENTITY) {
+						if (selectedCharacter == null) {
+							if (targetQuad.type == Type.CHARACTER) {
+								Character character = RaycastUtils.quadToCharacter(room, targetQuad);
+								if (character.isPlayerSelectable())
+									selectedCharacter = character;
+							}
+						} else {
+							Entity targetEntity = RaycastUtils.quadToEntity(room, targetQuad);
+							Action defaultAction = targetEntity.getDefaultAction();
+//							if (defaultAction != null) {
+//								if (defaultAction.canPerform(selectedCharacter, targetEntity)) {
+									//get square
+									int[] targetSquare = room.getClosestAdjacentSquare(selectedCharacter.gridRow,
+											selectedCharacter.gridCol, targetEntity.gridRow, targetEntity.gridCol);
+									if (targetSquare != null) { //if there is a free square
+										//TODO: queue action
+										//begin moving to square
+										selectedCharacter.walkTo(room.originx + targetSquare[1],
+												room.originz + targetSquare[0]);
+										//action gets triggered when they arrive
+									}
+//								}
+//							}
 						}
-						selectedCharacter = character;
-					} else if (targetQuad.type == Type.FLOOR) {
+					}else if (targetQuad.type == Type.FLOOR) {
 						if (selectedCharacter != null) {
 							selectedCharacter.walkTo(targetQuad.getX(), targetQuad.getZ());
 							selectedCharacter = null;

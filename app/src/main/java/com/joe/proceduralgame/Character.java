@@ -78,5 +78,9 @@ public abstract class Character extends Entity {
 	public boolean isPlayerSelectable() {
 		return true;
 	}
+
+	public boolean ownsQuad(Quad quad) {
+		return quad == this.quad;
+	}
 	
 }
