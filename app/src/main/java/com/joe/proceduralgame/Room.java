@@ -257,4 +257,33 @@ public class Room {
 
 	}
 
+	/**
+	 * Finds the closest empty square to the start that is adjacent to the end square.
+	 *
+	 * Returns [startRow, startCol] if the start square is adjacent to the end square.
+	 * Returns null if there is no open adjacent square.
+	 *
+	 * @return an int[] = {row, col} of the closest square or null
+	 */
+	public int[] getClosestAdjacentSquare(int startRow, int startCol, int endRow, int endCol) {
+		int[] result = null;
+		double resultDist = Double.MAX_VALUE;
+		for (int i = 0; i < 4; i++) {
+			double theta = Math.PI * .5 * i;
+			int adjRow = (int) Math.round(endRow - Math.sin(theta));
+			int adjCol = (int) Math.round(endCol + Math.cos(theta));
+
+			if ((startRow == endRow && startCol == adjCol) || grid[adjRow][adjCol] == null) {
+				double dist = Math.hypot(adjRow - startRow, adjCol - startCol);
+				if (dist < resultDist) {
+					resultDist = dist;
+					result = new int[2];
+					result[0] = adjRow;
+					result[1] = adjCol;
+				}
+			}
+		}
+		return result;
+	}
+
 }
