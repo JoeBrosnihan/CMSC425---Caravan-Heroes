@@ -17,6 +17,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	
 	public static final int COORDS_PER_VERTEX = 2;
 	public static final float NEAR_PLANE = 1;
+	public static final float CAMERA_ANGLE = 60;
 	
 	private GameGLView gameView;
 	private TextureManager textureManager;
@@ -86,7 +87,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    
 	    Matrix.setIdentityM(mViewMatrix, 0);
 	    Matrix.translateM(mViewMatrix, 0, 0, 0, -camy);
-	    Matrix.rotateM(mViewMatrix, 0, 60, 1, 0, 0);
+	    Matrix.rotateM(mViewMatrix, 0, CAMERA_ANGLE, 1, 0, 0);
 	    Matrix.translateM(mViewMatrix, 0, -camx, 0, -camz);
 
 	    // Calculate the projection and view transformation
