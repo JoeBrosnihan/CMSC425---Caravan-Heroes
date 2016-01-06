@@ -273,7 +273,7 @@ public class Room {
 			int adjRow = (int) Math.round(endRow - Math.sin(theta));
 			int adjCol = (int) Math.round(endCol + Math.cos(theta));
 
-			if ((startRow == endRow && startCol == adjCol) || grid[adjRow][adjCol] == null) {
+			if ((startRow == adjRow && startCol == adjCol) || grid[adjRow][adjCol] == null) {
 				double dist = Math.hypot(adjRow - startRow, adjCol - startCol);
 				if (dist < resultDist) {
 					resultDist = dist;

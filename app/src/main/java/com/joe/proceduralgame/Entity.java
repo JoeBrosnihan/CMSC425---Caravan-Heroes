@@ -37,6 +37,10 @@ public abstract class Entity {
 		return defaultAction;
 	}
 
+	protected void setDefaultAction(Action action) {
+		defaultAction = action;
+	}
+
 	protected abstract void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion;
 	public abstract void draw(int shaderProgram, float[] mVPMatrix);
 	/**Returns true iff the quad belongs to this entity.*/

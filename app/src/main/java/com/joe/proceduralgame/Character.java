@@ -2,9 +2,9 @@ package com.joe.proceduralgame;
 
 import android.opengl.Matrix;
 
-public abstract class Character extends Entity {
+public abstract class Character extends AttackableEntity {
 	
-	public static final int STATE_WAITING = 0, STATE_WALKING = 1;
+	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2;
 	public static final float TILT_ANGLE = 45f, VERTICAL_OFFSET = .25f, GROUND_LEVEL = .05f;
 	
 	protected float offsetX = 0, scaleX = 1, scaleY = 1;
@@ -14,8 +14,11 @@ public abstract class Character extends Entity {
 	public float speed = 1.5f;
 	public int state = 0;
 	public long stateStartTime;
-	
+
 	public Quad quad;
+
+	private Action.Pair queuedAction = null;
+	private boolean playerOwned = false;
 	
 	public Character() {
 		super();
@@ -49,7 +52,18 @@ public abstract class Character extends Entity {
 			setPosition(posx + dx / d * speed * dt, posz += dy / d * speed * dt);
 		}
 	}
-	
+
+	public void attack(AttackableEntity target) {
+		if (target.posx > posx)
+			dir = 1;
+		if (target.posx < posx)
+			dir = -1;
+		setState(STATE_ATTACKING);
+	}
+
+	/**
+	 * Sets state to STATE_WALKING
+	 */
 	public void walkTo(float destx, float destz) {
 		this.destx = destx;
 		this.destz = destz;
@@ -62,6 +76,11 @@ public abstract class Character extends Entity {
 	
 	public void reachedDest() { // linear walk dest, not necessarily path dest.
 		setState(STATE_WAITING);
+		Action.Pair pair = dequeueAction();
+		if (pair != null) {
+			assert(pair.action.canPerform(this, pair.target));
+			pair.action.perform(this, pair.target);
+		}
 	}
 	
 	public void setState(int newState) {
@@ -75,12 +94,36 @@ public abstract class Character extends Entity {
 		quad.destroy();
 	}
 	
-	public boolean isPlayerSelectable() {
-		return true;
+	public boolean isPlayerOwned() {
+		return playerOwned;
 	}
 
 	public boolean ownsQuad(Quad quad) {
 		return quad == this.quad;
 	}
-	
+
+	public void takeDamage(int damage) {
+		//TODO implement, or change to something more sophisticated like takeHit(Character, damage)
+	}
+
+	public void setPlayerOwned(boolean val) {
+		playerOwned = val;
+	}
+
+	/**
+	 * Performs the Action on the target Entity when the Character reaches its destination
+	 */
+	public void enqueueAction(Action action, Entity target) {
+		queuedAction = new Action.Pair(action, target);
+	}
+
+	/**
+	 * @return the queued Action.Pair or null
+	 */
+	private Action.Pair dequeueAction() {
+		Action.Pair pair = queuedAction;
+		queuedAction = null;
+		return pair;
+	}
+
 }

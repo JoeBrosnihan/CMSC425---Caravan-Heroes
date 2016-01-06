@@ -35,26 +35,26 @@ public class Controller {
 						if (selectedCharacter == null) {
 							if (targetQuad.type == Type.CHARACTER) {
 								Character character = RaycastUtils.quadToCharacter(room, targetQuad);
-								if (character.isPlayerSelectable())
+								if (character.isPlayerOwned())
 									selectedCharacter = character;
 							}
 						} else {
 							Entity targetEntity = RaycastUtils.quadToEntity(room, targetQuad);
 							Action defaultAction = targetEntity.getDefaultAction();
-//							if (defaultAction != null) {
-//								if (defaultAction.canPerform(selectedCharacter, targetEntity)) {
+							if (defaultAction != null) {
+								if (defaultAction.canPerform(selectedCharacter, targetEntity)) {
 									//get square
 									int[] targetSquare = room.getClosestAdjacentSquare(selectedCharacter.gridRow,
 											selectedCharacter.gridCol, targetEntity.gridRow, targetEntity.gridCol);
 									if (targetSquare != null) { //if there is a free square
-										//TODO: queue action
+										selectedCharacter.enqueueAction(targetEntity.getDefaultAction(), targetEntity);
 										//begin moving to square
 										selectedCharacter.walkTo(room.originx + targetSquare[1],
 												room.originz + targetSquare[0]);
 										//action gets triggered when they arrive
 									}
-//								}
-//							}
+								}
+							}
 						}
 					}else if (targetQuad.type == Type.FLOOR) {
 						if (selectedCharacter != null) {

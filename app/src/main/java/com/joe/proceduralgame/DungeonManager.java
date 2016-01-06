@@ -36,6 +36,7 @@ public class DungeonManager extends Thread {
 		
 		leader = new Swordsman();
 		currentRoom.addCharacter(leader);
+		leader.setPlayerOwned(true);
 		
 		final Character enemy = new Ghoul();
 		enemy.posx = 2;
@@ -63,7 +64,7 @@ public class DungeonManager extends Thread {
 		//moveDummy.start();
 		
 		final Character enemy2 = new SkeletonWarrior();
-		enemy2.posx = 2;
+		enemy2.posx = 3;
 		enemy2.posz = 2;
 		currentRoom.addCharacter(enemy2);
 		
