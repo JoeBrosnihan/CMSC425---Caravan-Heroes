@@ -1,10 +1,14 @@
 package com.joe.proceduralgame;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -284,6 +288,69 @@ public class Room {
 			}
 		}
 		return result;
+	}
+
+	public LinkedList<int[]> findPath(int startRow, int startCol, final int destRow, final int destCol) {
+		//TODO handle trivial case start = dest
+		boolean[][] discovered = new boolean[length][width]; //initialized to false
+		final int[][] g = new int[length][width];
+		int[][][] prev = new int[length][width][];
+
+		Comparator<int[]> squareComparator = new Comparator<int[]>() {
+			@Override
+			public int compare(int[] lhs, int[] rhs) {
+				int h_lhs = Math.abs(destRow - lhs[0]) + Math.abs(destCol - lhs[1]);
+				int h_rhs = Math.abs(destRow - rhs[0]) + Math.abs(destCol - rhs[1]);
+				int f_lhs = g[lhs[0]][lhs[1]] + h_lhs;
+				int f_rhs = g[rhs[0]][rhs[1]] + h_rhs;
+				return f_lhs - f_rhs;
+			}
+		};
+
+		PriorityQueue<int[]> frontier = new PriorityQueue<int[]>(4, squareComparator);
+
+		int[] curSquare = new int[2];
+		curSquare[0] = startRow;
+		curSquare[1] = startCol;
+		frontier.add(curSquare);
+
+		while ((curSquare = frontier.poll()) != null) {
+			if (curSquare[0] == destRow && curSquare[1] == destCol)
+				break;
+
+			for (int i = 0; i < 4; i++) {
+				double theta = Math.PI * .5 * i;
+				int adjRow = (int) Math.round(curSquare[0] - Math.sin(theta));
+				int adjCol = (int) Math.round(curSquare[1] + Math.cos(theta));
+				if (adjRow < 0 || adjRow >= length || adjCol < 0 || adjCol >= width)
+					continue;
+				if (!discovered[adjRow][adjCol]) {
+					discovered[adjRow][adjCol] = true;
+					if (grid[adjRow][adjCol] != null)
+						continue;
+					//set ptr to prev square
+					prev[adjRow][adjCol] = curSquare;
+					//cost so far
+					g[adjRow][adjCol] = g[curSquare[0]][curSquare[1]] + 1;
+
+					int[] adjSquare = new int[2];
+					adjSquare[0] = adjRow;
+					adjSquare[1] = adjCol;
+					frontier.add(adjSquare);
+				}
+			}
+		}
+
+		if (curSquare != null) { //success, reconstruct path
+			LinkedList<int[]> path = new LinkedList<int[]>();
+			while (curSquare != null) {
+				path.addFirst(curSquare);
+				curSquare = prev[curSquare[0]][curSquare[1]];
+			}
+			return path;
+		} else {
+			return null;
+		}
 	}
 
 }
