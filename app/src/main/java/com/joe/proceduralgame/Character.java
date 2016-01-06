@@ -2,6 +2,8 @@ package com.joe.proceduralgame;
 
 import android.opengl.Matrix;
 
+import java.util.LinkedList;
+
 public abstract class Character extends AttackableEntity {
 	
 	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2;
@@ -18,6 +20,7 @@ public abstract class Character extends AttackableEntity {
 	public Quad quad;
 
 	private Action.Pair queuedAction = null;
+	private LinkedList<int[]> currentPath = null;
 	private boolean playerOwned = false;
 	
 	public Character() {
@@ -61,9 +64,16 @@ public abstract class Character extends AttackableEntity {
 		setState(STATE_ATTACKING);
 	}
 
+	public void walkPath(LinkedList<int[]> path) {
+		currentPath = path;
+		int[] dest = path.removeFirst();
+		walkTo(currentRoom.originx + dest[1], currentRoom.originz + dest[0]);
+	}
+
 	/**
 	 * Sets state to STATE_WALKING
 	 */
+	//TODO this should be made private once units only move via paths
 	public void walkTo(float destx, float destz) {
 		this.destx = destx;
 		this.destz = destz;
@@ -75,6 +85,11 @@ public abstract class Character extends AttackableEntity {
 	}
 	
 	public void reachedDest() { // linear walk dest, not necessarily path dest.
+		if (currentPath != null && !currentPath.isEmpty()) { //TODO at some point in development, currentPath should always be nonnull
+			int[] dest = currentPath.removeFirst();
+			walkTo(currentRoom.originx + dest[1], currentRoom.originz + dest[0]);
+			return;
+		}
 		setState(STATE_WAITING);
 		Action.Pair pair = dequeueAction();
 		if (pair != null) {

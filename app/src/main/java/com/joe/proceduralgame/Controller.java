@@ -9,6 +9,8 @@ import com.joe.proceduralgame.Quad.Type;
 
 import android.view.MotionEvent;
 
+import java.util.LinkedList;
+
 public class Controller {
 	private GameGLView view;
 	private DungeonManager manager;
@@ -58,8 +60,12 @@ public class Controller {
 						}
 					}else if (targetQuad.type == Type.FLOOR) {
 						if (selectedCharacter != null) {
-							selectedCharacter.walkTo(targetQuad.getX(), targetQuad.getZ());
-							selectedCharacter = null;
+							int targetRow = (int) Math.round(targetQuad.getZ() - room.originz);
+							int targetCol = (int) Math.round(targetQuad.getX() - room.originx);
+							LinkedList<int[]> path = room.findPath(selectedCharacter.gridRow,
+									selectedCharacter.gridCol, targetRow, targetCol);
+							if (path != null)
+								selectedCharacter.walkPath(path);
 						}
 					}
 				}
