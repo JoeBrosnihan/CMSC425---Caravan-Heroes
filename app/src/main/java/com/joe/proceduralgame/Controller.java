@@ -46,13 +46,13 @@ public class Controller {
 							if (defaultAction != null) {
 								if (defaultAction.canPerform(selectedCharacter, targetEntity)) {
 									//get square
-									int[] targetSquare = room.getClosestAdjacentSquare(selectedCharacter.gridRow,
-											selectedCharacter.gridCol, targetEntity.gridRow, targetEntity.gridCol);
-									if (targetSquare != null) { //if there is a free square
+									LinkedList<int[]> path = room.findPath(selectedCharacter.gridRow,
+											selectedCharacter.gridCol, targetEntity.gridRow,
+											targetEntity.gridCol, false);
+									if (path != null) { //if there is a free square
 										selectedCharacter.enqueueAction(targetEntity.getDefaultAction(), targetEntity);
 										//begin moving to square
-										selectedCharacter.walkTo(room.originx + targetSquare[1],
-												room.originz + targetSquare[0]);
+										selectedCharacter.walkPath(path);
 										//action gets triggered when they arrive
 									}
 								}
@@ -63,9 +63,11 @@ public class Controller {
 							int targetRow = (int) Math.round(targetQuad.getZ() - room.originz);
 							int targetCol = (int) Math.round(targetQuad.getX() - room.originx);
 							LinkedList<int[]> path = room.findPath(selectedCharacter.gridRow,
-									selectedCharacter.gridCol, targetRow, targetCol);
-							if (path != null)
+									selectedCharacter.gridCol, targetRow, targetCol, true);
+							if (path != null) {
+								selectedCharacter.clearAction();
 								selectedCharacter.walkPath(path);
+							}
 						}
 					}
 				}

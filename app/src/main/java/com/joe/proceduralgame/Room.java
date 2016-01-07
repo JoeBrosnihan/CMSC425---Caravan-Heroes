@@ -290,8 +290,22 @@ public class Room {
 		return result;
 	}
 
-	public LinkedList<int[]> findPath(int startRow, int startCol, final int destRow, final int destCol) {
-		//TODO handle trivial case start = dest
+	/**
+	 * Finds a shortest path in this room between two squares that avoids squares with Entities.
+	 *
+	 * If start = end, returns a path with one square, the starting square.
+	 *
+	 * @param startRow
+	 * @param startCol
+	 * @param destRow
+	 * @param destCol
+	 * @param includeDest if true, the path will exclude the dest square and will end on an
+	 *                    adjacent square.
+	 * @return a LinkedList of length 2 int[]s, each corresponding to the row and col of the next
+	 * square, or returns null if no such path exists.
+	 */
+	public LinkedList<int[]> findPath(int startRow, int startCol, final int destRow,
+									  final int destCol, boolean includeDest) {
 		boolean[][] discovered = new boolean[length][width]; //initialized to false
 		final int[][] g = new int[length][width];
 		int[][][] prev = new int[length][width][];
@@ -314,6 +328,7 @@ public class Room {
 		curSquare[1] = startCol;
 		frontier.add(curSquare);
 
+		Outer:
 		while ((curSquare = frontier.poll()) != null) {
 			if (curSquare[0] == destRow && curSquare[1] == destCol)
 				break;
@@ -326,6 +341,8 @@ public class Room {
 					continue;
 				if (!discovered[adjRow][adjCol]) {
 					discovered[adjRow][adjCol] = true;
+					if (!includeDest && adjRow == destRow && adjCol == destCol)
+						break Outer;
 					if (grid[adjRow][adjCol] != null)
 						continue;
 					//set ptr to prev square

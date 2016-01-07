@@ -133,6 +133,13 @@ public abstract class Character extends AttackableEntity {
 	}
 
 	/**
+	 * Removes the queued Action pair
+	 */
+	public void clearAction() {
+		queuedAction = null;
+	}
+
+	/**
 	 * @return the queued Action.Pair or null
 	 */
 	private Action.Pair dequeueAction() {
