@@ -15,7 +15,7 @@ public class SkeletonWarrior extends com.joe.proceduralgame.Character {
 
 	@Override
 	protected void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
-		texture = tex.referenceLoad(R.drawable.atlas_demo);
+		texture = tex.referenceLoad(R.drawable.atlas_demo2);
 		quad = Quad.createDynamicQuad(Type.CHARACTER, new float[16], texture);
 		updateModelMatrix();
 	}
@@ -27,44 +27,73 @@ public class SkeletonWarrior extends com.joe.proceduralgame.Character {
 		long animTime;
 		switch (state) {
 		case STATE_WAITING:
-			animTime = (System.currentTimeMillis() - stateStartTime) % 1400;
-			if (animTime < 700)
-				newIndex = 11;
+			animTime = (System.currentTimeMillis() - stateStartTime) % 1600;
+			if (animTime < 800)
+				newIndex = 19;
 			else
-				newIndex = 12;
+				newIndex = 20;
 			break;
 		case STATE_WALKING:
 			animTime = (System.currentTimeMillis() - stateStartTime) % 600;
 			if (animTime < 150)
-				newIndex = 13;
+				newIndex = 21;
 			else if (animTime < 300)
-				newIndex = 14;
+				newIndex = 22;
 			else if (animTime < 450)
-				newIndex = 15;
+				newIndex = 23;
 			else
-				newIndex = 16;
+				newIndex = 15;
+			break;
+		case STATE_ATTACKING:
+			animTime = (System.currentTimeMillis() - stateStartTime) % 1000;
+			if (animTime < 200)
+				newIndex = 32;
+			else if (animTime < 400)
+				newIndex = 33;
+			else if (animTime < 500)
+				newIndex = 34;
+			else
+				newIndex = 36;
 			break;
 		}
 
 		synchronized (this) {
 			// as of right now, skele is always 1x1. No need to resize
 			
-//			if (newIndex != atlasIndex) {
-//				atlasIndex = newIndex;
-//				switch (newIndex) {
-//				case 11:
-//				case 12: // idle
-//				case 13:
-//				case 14:
-//				case 16:
-//				case 15: // walking, standard
-//					offsetX = 0;
-//					scaleX = 1;
-//					scaleY = 1;
-//					updateModelMatrix();
-//					break;
-//				}
-//			}
+			if (newIndex != atlasIndex) {
+				atlasIndex = newIndex;
+				switch (newIndex) {
+				case 19:
+				case 20: // idle
+				case 21:
+				case 22:
+				case 23:
+				case 15: // walking, standard
+				case 32: // attack 1
+					offsetX = 0;
+					scaleX = 1;
+					scaleY = 1;
+					updateModelMatrix();
+					break;
+				case 33: // attack 2
+					scaleX = 1;
+					scaleY = 2;
+					updateModelMatrix();
+					break;
+				case 34: // attack 3
+					offsetX = .5f;
+					scaleX = 2;
+					scaleY = 2;
+					updateModelMatrix();
+					break;
+				case 36: // attack 4
+					offsetX = .5f;
+					scaleX = 2;
+					scaleY = 1;
+					updateModelMatrix();
+					break;
+				}
+			}
 			
 			quad.uvOrigin[0] = (newIndex % nCol) / (float) nCol; // u coord
 			quad.uvOrigin[1] = (newIndex / nCol) / (float) nCol; // v coord

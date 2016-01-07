@@ -15,7 +15,7 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 
 	@Override
 	protected void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
-		texture = tex.referenceLoad(R.drawable.atlas_demo);
+		texture = tex.referenceLoad(R.drawable.atlas_demo2);
 		quad = Quad.createDynamicQuad(Type.CHARACTER, new float[16], texture);
 	}
 

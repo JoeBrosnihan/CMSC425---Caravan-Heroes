@@ -15,7 +15,7 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 
 	@Override
 	protected void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
-		texture = tex.referenceLoad(R.drawable.atlas_demo);
+		texture = tex.referenceLoad(R.drawable.atlas_demo2);
 		quad = Quad.createDynamicQuad(Type.CHARACTER, new float[16], texture);
 	}
 
@@ -28,20 +28,29 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 		case STATE_WAITING:
 			animTime = (System.currentTimeMillis() - stateStartTime) % 1400;
 			if (animTime < 700)
-				newIndex = 0;
+				newIndex = 8;
 			else
-				newIndex = 1;
+				newIndex = 9;
 			break;
 		case STATE_WALKING:
 			animTime = (System.currentTimeMillis() - stateStartTime) % 600;
 			if (animTime < 150)
-				newIndex = 2;
+				newIndex = 0;
 			else if (animTime < 300)
-				newIndex = 4;
+				newIndex = 1;
 			else if (animTime < 450)
-				newIndex = 5;
+				newIndex = 3;
 			else
-				newIndex = 6;
+				newIndex = 2;
+			break;
+		case STATE_ATTACKING:
+			animTime = (System.currentTimeMillis() - stateStartTime) % 300;
+			if (animTime < 200)
+				newIndex = 10;
+			else if (animTime < 250)
+				newIndex = 11;
+			else
+				newIndex = 17;
 			break;
 		}
 
@@ -49,22 +58,35 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 			if (newIndex != atlasIndex) {
 				atlasIndex = newIndex;
 				switch (newIndex) {
+				case 8:
+				case 9: // idle
+					offsetX = 0;
+					scaleX = 1;
+					scaleY = 1;
+					updateModelMatrix();
+					break;
 				case 0:
-				case 1: // idle
+				case 1:
+				case 2: // walking, standard
 					offsetX = 0;
 					scaleX = 1;
 					scaleY = 1;
 					updateModelMatrix();
 					break;
-				case 4:
-				case 5:
-				case 6: // walking, standard
+				case 3: // walking, odd frame
+					offsetX = .5f;
+					scaleX = 2;
+					scaleY = 1;
+					updateModelMatrix();
+					break;
+				case 10:
+				case 11: // attack, standard
 					offsetX = 0;
 					scaleX = 1;
 					scaleY = 1;
 					updateModelMatrix();
 					break;
-				case 2: // walking, odd frame
+				case 17:
 					offsetX = .5f;
 					scaleX = 2;
 					scaleY = 1;
