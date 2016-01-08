@@ -49,7 +49,7 @@ public class SkeletonWarrior extends com.joe.proceduralgame.Character {
 				newIndex = 15;
 			break;
 		case STATE_ATTACKING:
-			animTime = (System.currentTimeMillis() - stateStartTime) % 1000;
+			animTime = System.currentTimeMillis() - stateStartTime;
 			if (animTime < 200)
 				newIndex = 32;
 			else if (animTime < 400)

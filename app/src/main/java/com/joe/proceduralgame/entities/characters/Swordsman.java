@@ -48,7 +48,7 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 				newIndex = 2;
 			break;
 		case STATE_ATTACKING:
-			animTime = (System.currentTimeMillis() - stateStartTime) % 300;
+			animTime = System.currentTimeMillis() - stateStartTime;
 			if (animTime < 200)
 				newIndex = 10;
 			else if (animTime < 250)
