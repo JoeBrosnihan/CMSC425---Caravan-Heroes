@@ -7,7 +7,7 @@ import android.opengl.Matrix;
  */
 public class DamageDisplay {
 
-    private static float SCALE_X = .5f, SCALE_Y = .5f, INITIAL_Y = 1.f;
+    private static float SCALE_X = .5f, SCALE_Y = .5f, INITIAL_Y = 1.f, SPEED_Y = .5f;
     //How long the display will last before disappearing in ms
     public static final long LIFETIME = 500;
 
@@ -60,9 +60,10 @@ public class DamageDisplay {
      */
     public void draw(int shaderProgram, float[] mVPMatrix, int uiTextureUnit) {
         float offx = -(ndigits - 1) / 2.0f;
+        float offy = (System.currentTimeMillis() - creationTime) * .001f * SPEED_Y;
         for (int i = 0; i < digits.length; i++) {
             digits[i].textureUnit = uiTextureUnit;
-            Matrix.translateM(digits[i].modelMatrix, 0, baseMatrix, 0, (offx + i) * SCALE_X, 0, 0);
+            Matrix.translateM(digits[i].modelMatrix, 0, baseMatrix, 0, (offx + i) * SCALE_X, offy, 0);
             digits[i].draw(shaderProgram, mVPMatrix);
         }
     }
