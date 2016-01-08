@@ -98,7 +98,7 @@ public class DungeonManager extends Thread {
 			} else if (c.state == Character.STATE_ATTACKING) {
 				if (!c.stateActionPerformed) {
 					if (time - c.stateStartTime >= c.attackHitTime) {
-						int damage = 1; //TODO calculate damage
+						int damage = 27; //TODO calculate damage
 						c.getAttackTarget().takeDamage(damage);
 						c.stateActionPerformed = true;
 					}

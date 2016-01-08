@@ -34,6 +34,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	float camx, camy, camz;
 	
 	private Quad characterSelector;
+	private int uiTextureUnit;
 	
 	public static void catchGLError() {
 		int a1 = GLES20.GL_INVALID_ENUM;
@@ -76,9 +77,11 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    for (Entity e : dungeonManager.currentRoom.entities) {
 	    	e.draw(program, mVPMatrix);
 	    }
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		for (DamageDisplay d : dungeonManager.currentRoom.damageDisplays) {
-			d.draw(program, mVPMatrix);
+			d.draw(program, mVPMatrix, uiTextureUnit);
 		}
+		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 	}
 
 	public void onDrawFrame(GL10 unused) {
@@ -108,10 +111,9 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	
 	private void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
 		Quad.loadBuffer();
-		
-		int selectorTex;
-		selectorTex = tex.referenceLoad(R.drawable.ui_atlas_1);
-		characterSelector = Quad.createDynamicQuad(Type.DECORATION, new float[16], selectorTex);
+
+		uiTextureUnit = tex.referenceLoad(R.drawable.ui_atlas);
+		characterSelector = Quad.createDynamicQuad(Type.DECORATION, new float[16], uiTextureUnit);
 		characterSelector.uvOrigin[0] = 3f / 8f;
 		characterSelector.uvOrigin[1] = 0f;
 		characterSelector.uvScale[0] = 1f / 8f;
