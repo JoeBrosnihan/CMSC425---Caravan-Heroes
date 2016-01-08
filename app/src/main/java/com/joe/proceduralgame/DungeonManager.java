@@ -91,9 +91,23 @@ public class DungeonManager extends Thread {
 	}
 	
 	public void update(float dt) {
+		long time = System.currentTimeMillis();
 		for (Character c : currentRoom.characters) {
-			if (c.state == Character.STATE_WALKING)
+			if (c.state == Character.STATE_WALKING) {
 				c.move(dt);
+			} else if (c.state == Character.STATE_ATTACKING) {
+				if (!c.stateActionPerformed) {
+					if (time - c.stateStartTime >= c.attackHitTime) {
+						int damage = 1; //TODO calculate damage
+						c.getAttackTarget().takeDamage(damage);
+						c.stateActionPerformed = true;
+					}
+				} else {
+					if (time - c.stateStartTime >= c.attackAnimationTime) {
+						c.setState(Character.STATE_WAITING);
+					}
+				}
+			}
 		}
 	}
 

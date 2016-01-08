@@ -39,14 +39,7 @@ public class Room {
 	int[] textures; // texture units for each texture index
 	float[][] uvOrigins; // {u, v} origin for each uv index
 	float[][] uvScales; // size of patch on texture for each uv index
-	
-	public void update(float dt) {
-		//TODO update all entities?
-		for (Character c : characters) {
-			c.move(dt);
-		}
-	}
-	
+
 	public void moveEntity(Entity entity, int fromRow, int fromCol) {
 		// XXX What if a team member moves through a team member?
 		assert grid[fromRow][fromCol] == entity;

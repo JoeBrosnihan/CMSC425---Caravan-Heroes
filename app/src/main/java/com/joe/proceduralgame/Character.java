@@ -10,21 +10,38 @@ public abstract class Character extends AttackableEntity {
 	public static final float TILT_ANGLE = 45f, VERTICAL_OFFSET = .25f, GROUND_LEVEL = .05f;
 	
 	protected float offsetX = 0, scaleX = 1, scaleY = 1;
-	
+
+	public final int attackHitTime;
+	public final int attackAnimationTime;
+
 	public float destx, destz;
 	public int dir = 1;
 	public float speed = 1.5f;
 	public int state = 0;
 	public long stateStartTime;
+	public boolean stateActionPerformed;
 
 	public Quad quad;
 
+	//Action, target pair to be executed when the Character reaches its destination
 	private Action.Pair queuedAction = null;
 	private LinkedList<int[]> currentPath = null;
 	private boolean playerOwned = false;
-	
-	public Character() {
+	//The entity that the Character is currently attacking
+	//Set to the target every time attack(target) is called. TODO maybe set to null when done?
+	private AttackableEntity attackTarget;
+
+	/**
+	 * Creates a new character with the given parameters
+	 *
+	 * @param attackHitTime the time of the frame on which this character's basic attack connects
+	 *                      in ms
+	 * @param attackAnimationTime the length of the basic attack animation in ms
+	 */
+	public Character(int attackHitTime, int attackAnimationTime) {
 		super();
+		this.attackHitTime = attackHitTime;
+		this.attackAnimationTime = attackAnimationTime;
 	}
 	
 	@Override
@@ -62,6 +79,7 @@ public abstract class Character extends AttackableEntity {
 		if (target.posx < posx)
 			dir = -1;
 		setState(STATE_ATTACKING);
+		attackTarget = target;
 	}
 
 	public void walkPath(LinkedList<int[]> path) {
@@ -83,7 +101,13 @@ public abstract class Character extends AttackableEntity {
 			dir = -1;
 		setState(STATE_WALKING);
 	}
-	
+
+	/**
+	 * Called when the character reaches the square it is walking to.
+	 *
+	 * This square may be just an intermediary square along a path it is walking or the final
+	 * square itself.
+	 */
 	public void reachedDest() { // linear walk dest, not necessarily path dest.
 		if (currentPath != null && !currentPath.isEmpty()) { //TODO at some point in development, currentPath should always be nonnull
 			int[] dest = currentPath.removeFirst();
@@ -97,9 +121,17 @@ public abstract class Character extends AttackableEntity {
 			pair.action.perform(this, pair.target);
 		}
 	}
-	
+
+	/**
+	 * Called to change the Character's state to a new state.
+	 *
+	 * If the state is new, resets stateActionPerformed and stateStartTime.
+	 *
+	 * @param newState the Character's new state
+	 */
 	public void setState(int newState) {
 		if (state != newState) {
+			stateActionPerformed = false;
 			state = newState;
 			stateStartTime = System.currentTimeMillis();
 		}
@@ -123,6 +155,16 @@ public abstract class Character extends AttackableEntity {
 
 	public void setPlayerOwned(boolean val) {
 		playerOwned = val;
+	}
+
+	/**
+	 * Gets the target entity this character is currently attacking.
+	 *
+	 * Undefined behavior if not currently attacking.
+	 * @return AttackableEntity target
+	 */
+	public AttackableEntity getAttackTarget() {
+		return attackTarget;
 	}
 
 	/**

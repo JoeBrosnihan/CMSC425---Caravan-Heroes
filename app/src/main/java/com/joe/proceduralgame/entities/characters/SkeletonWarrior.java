@@ -13,6 +13,10 @@ public class SkeletonWarrior extends com.joe.proceduralgame.Character {
 	private int texture;
 	private int atlasIndex = 0;
 
+	public SkeletonWarrior() {
+		super(400, 1600);
+	}
+
 	@Override
 	protected void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
 		texture = tex.referenceLoad(R.drawable.atlas_demo2);
