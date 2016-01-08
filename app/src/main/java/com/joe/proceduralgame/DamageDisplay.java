@@ -8,11 +8,13 @@ import android.opengl.Matrix;
 public class DamageDisplay {
 
     private static float SCALE_X = .5f, SCALE_Y = .5f, INITIAL_Y = 1.f;
+    //How long the display will last before disappearing in ms
+    public static final long LIFETIME = 500;
 
+    public long creationTime;
     //In order left to right
     private Quad[] digits;
     private float posx, posz;
-    private long creationTime;
     private float[] baseMatrix = new float[16];
     private int ndigits;
 

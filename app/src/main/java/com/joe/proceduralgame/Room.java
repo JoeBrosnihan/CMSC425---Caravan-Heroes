@@ -101,7 +101,9 @@ public class Room {
 	}
 
 	public void addDamageDisplay(DamageDisplay display) {
-		damageDisplays.add(display);
+		synchronized (damageDisplays) {
+			damageDisplays.add(display);
+		}
 	}
 
 	public void addCharacter(Character c) {

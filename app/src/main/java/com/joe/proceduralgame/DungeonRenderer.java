@@ -1,6 +1,7 @@
 package com.joe.proceduralgame;
 
 import java.nio.FloatBuffer;
+import java.util.Iterator;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -71,6 +72,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
     	}
     	
 	    GLES20.glDisable(GLES20.GL_CULL_FACE);
+		//TODO do these need to be synchronized as well? What if something gets added from game thread?
 	    for (EdgeEntity e : dungeonManager.currentRoom.edgeEntities) {
 	    	e.draw(program, mVPMatrix);
 	    }
@@ -78,8 +80,16 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    	e.draw(program, mVPMatrix);
 	    }
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-		for (DamageDisplay d : dungeonManager.currentRoom.damageDisplays) {
-			d.draw(program, mVPMatrix, uiTextureUnit);
+		synchronized (dungeonManager.currentRoom.damageDisplays) {
+			long t = System.currentTimeMillis();
+			Iterator<DamageDisplay> iter = dungeonManager.currentRoom.damageDisplays.iterator();
+			while (iter.hasNext()) {
+				DamageDisplay display = iter.next();
+				if (t - display.creationTime >= DamageDisplay.LIFETIME)
+					iter.remove();
+				else
+					display.draw(program, mVPMatrix, uiTextureUnit);
+			}
 		}
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 	}
