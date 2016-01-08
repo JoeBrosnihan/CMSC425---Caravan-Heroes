@@ -58,7 +58,8 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    GLES20.glEnable(GLES20.GL_CULL_FACE);
 	    dungeonManager.currentRoom.draw(program, mVPMatrix, vertexBuffer);
     	catchGLError();
-    	
+
+		//Draw box around selected Character
     	if (gameController.selectedCharacter != null) {
     		float posx = Math.round(gameController.selectedCharacter.posx); // TODO Could be optimiized to only do these calcs when nec.
     		float posz = Math.round(gameController.selectedCharacter.posz);
@@ -75,6 +76,9 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    for (Entity e : dungeonManager.currentRoom.entities) {
 	    	e.draw(program, mVPMatrix);
 	    }
+		for (DamageDisplay d : dungeonManager.currentRoom.damageDisplays) {
+			d.draw(program, mVPMatrix);
+		}
 	}
 
 	public void onDrawFrame(GL10 unused) {

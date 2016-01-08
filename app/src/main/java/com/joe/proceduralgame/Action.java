@@ -45,9 +45,6 @@ public abstract class Action {
         @Override
         public void perform(Character actor, Entity object) {
             actor.attack((AttackableEntity) object);
-            //TODO for debug purposes
-            if (object instanceof Character)
-                ((Character) object).dir *= -1;
         }
 
         /**

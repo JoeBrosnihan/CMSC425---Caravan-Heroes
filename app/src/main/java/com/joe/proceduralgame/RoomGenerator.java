@@ -126,7 +126,7 @@ public class RoomGenerator {
 		Matrix.translateM(model, 0, room.originx + col, 0, room.originz + row);
 		Matrix.rotateM(model, 0, 90, 1, 0, 0);
 		Quad floor = Quad.createStaticQuad(Type.FLOOR, model, texture);
-		room.quads.add(floor);
+		room.staticQuads.add(floor);
 	}
 	
 	private void addWallQuad(Room room, int row, int col, int dir, int texture) {
@@ -136,7 +136,7 @@ public class RoomGenerator {
 		Matrix.rotateM(model, 0, 90 + dir * 90, 0, 1, 0);
 		Matrix.translateM(model, 0, 0, .5f, .5f);
 		Quad wall = Quad.createStaticQuad(Type.WALL, model, texture);
-		room.quads.add(wall);
+		room.staticQuads.add(wall);
 	}
 	
 	private void addDecorationObject(Room room, int row, int col, int texture, int atlasIndex, int atlasSize) {
@@ -151,7 +151,7 @@ public class RoomGenerator {
 		obj.uvOrigin[1] = TextureManager.atlasV(atlasIndex, atlasSize);
 		obj.uvScale[0] = 1 / (float) atlasSize;
 		obj.uvScale[1] = 1 / (float) atlasSize;
-		room.quads.add(obj);
+		room.staticQuads.add(obj);
 	}
 
 }

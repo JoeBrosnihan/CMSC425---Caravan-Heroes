@@ -64,7 +64,7 @@ public class RaycastUtils {
 				}
 			}
 		}
-		for (Quad q : room.quads) {
+		for (Quad q : room.staticQuads) {
 			if (q.type == Type.DECORATION)
 				continue;
 			Matrix.invertM(inverseModel, 0, q.modelMatrix, 0);

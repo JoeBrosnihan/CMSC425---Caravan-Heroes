@@ -150,7 +150,9 @@ public abstract class Character extends AttackableEntity {
 	}
 
 	public void takeDamage(int damage) {
-		//TODO implement, or change to something more sophisticated like takeHit(Character, damage)
+		//TODO take damage
+		//TODO correctly set textureUnit to the UI texture with the numbers
+		currentRoom.addDamageDisplay(new DamageDisplay(damage, quad.textureUnit, posx, posz));
 	}
 
 	public void setPlayerOwned(boolean val) {

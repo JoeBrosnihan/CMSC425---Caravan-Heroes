@@ -1,14 +1,12 @@
 package com.joe.proceduralgame;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Queue;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -26,12 +24,17 @@ public class Room {
 	EdgeEntity[] edges;
 	int width, length;
 	int originx, originz;
-	List<Quad> quads = new ArrayList<Quad>();
+	//Holds only the static staticQuads of this room.
+	//These quads are loaded by the RoomGenerator. After load, none are added or transformed.
+	List<Quad> staticQuads = new ArrayList<Quad>();
+
 	List<Character> characters = new ArrayList<Character>();
 	List<Entity> entities = new ArrayList<Entity>();
 	List<EdgeEntity> edgeEntities = new ArrayList<EdgeEntity>();
 
-	// static geometry
+	List<DamageDisplay> damageDisplays = new ArrayList<DamageDisplay>();
+
+	////// static geometry //////
 	// sorted first by texture then by uv patch
 	float[][] quadModels; // model matrix of each quad
 	int[] textureIndices; // indices for change of texture
@@ -39,6 +42,7 @@ public class Room {
 	int[] textures; // texture units for each texture index
 	float[][] uvOrigins; // {u, v} origin for each uv index
 	float[][] uvScales; // size of patch on texture for each uv index
+	////// end static geometry //////
 
 	public void moveEntity(Entity entity, int fromRow, int fromCol) {
 		// XXX What if a team member moves through a team member?
@@ -95,7 +99,11 @@ public class Room {
 		else
 			return Math.round((2 * width + 1) * (posz - originz + .5f) + posx - originx);
 	}
-	
+
+	public void addDamageDisplay(DamageDisplay display) {
+		damageDisplays.add(display);
+	}
+
 	public void addCharacter(Character c) {
 		characters.add(c);
 		addEntity(c);
@@ -122,13 +130,13 @@ public class Room {
 	}
 	
 	private void loadStaticGeometry(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
-		if(quads.isEmpty()) {
+		if(staticQuads.isEmpty()) {
 			//initialize
 			return;
 		}
 		
-		// sort quads first by texture, then by uv patch within a texture
-		Collections.sort(quads, new Comparator<Quad>() {
+		// sort staticQuads first by texture, then by uv patch within a texture
+		Collections.sort(staticQuads, new Comparator<Quad>() {
 			public int compare(Quad lhs, Quad rhs) {
 				int comp = lhs.textureID - rhs.textureID;
 				if (comp != 0) {
@@ -142,14 +150,14 @@ public class Room {
 		int currentTextureID = -1;
 		int currentUVHash = -1;
 		// set not equal for convenience
-		currentTextureID = quads.get(0).textureID - 1;
-		currentUVHash = hashUV(quads.get(0).uvOrigin) - 1;
+		currentTextureID = staticQuads.get(0).textureID - 1;
+		currentUVHash = hashUV(staticQuads.get(0).uvOrigin) - 1;
 			
 		//count size for tex and uv arrays
 		int nUniqueTextures = 0;
 		int nUniqueUVs = 0;
-		for (int i = 0; i < quads.size(); i++) {
-			Quad q = quads.get(i);
+		for (int i = 0; i < staticQuads.size(); i++) {
+			Quad q = staticQuads.get(i);
 			if (q.textureID != currentTextureID) {
 				nUniqueTextures++;
 				currentTextureID = q.textureID;
@@ -159,7 +167,7 @@ public class Room {
 				currentUVHash = hashUV(q.uvOrigin);
 			}
 		}
-		quadModels = new float[quads.size()][16];
+		quadModels = new float[staticQuads.size()][16];
 		textureIndices = new int[nUniqueTextures];
 		uvIndices = new int[nUniqueUVs];
 		textures = new int[nUniqueTextures];
@@ -167,14 +175,14 @@ public class Room {
 		uvScales = new float[nUniqueUVs][2];
 		
 		// set not equal to the first element for convenience
-		currentTextureID = quads.get(0).textureID - 1;
-		currentUVHash = hashUV(quads.get(0).uvOrigin) - 1;
+		currentTextureID = staticQuads.get(0).textureID - 1;
+		currentUVHash = hashUV(staticQuads.get(0).uvOrigin) - 1;
 		
 		// current slots in index arrays
 		int iTex = -1;
 		int iUV = -1;
-		for (int i = 0; i < quads.size(); i++) {
-			Quad q = quads.get(i);
+		for (int i = 0; i < staticQuads.size(); i++) {
+			Quad q = staticQuads.get(i);
 			// copy model matrix
 			quadModels[i] = q.modelMatrix;
 			
