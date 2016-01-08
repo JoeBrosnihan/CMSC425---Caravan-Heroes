@@ -14,7 +14,7 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 	private int atlasIndex = 0;
 
 	public Swordsman() {
-		super(250, 300);
+		super(250, 450);
 	}
 
 	@Override
@@ -53,6 +53,8 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 				newIndex = 10;
 			else if (animTime < 250)
 				newIndex = 11;
+			else if (animTime < 350)
+				newIndex = 12;
 			else
 				newIndex = 17;
 			break;
@@ -90,7 +92,8 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 					scaleY = 1;
 					updateModelMatrix();
 					break;
-				case 17:
+				case 12:
+				case 17: //attack, arm extended
 					offsetX = .5f;
 					scaleX = 2;
 					scaleY = 1;
