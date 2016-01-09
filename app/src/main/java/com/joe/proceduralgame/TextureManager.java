@@ -15,7 +15,7 @@ public final class TextureManager {
 	public static final int MAX_COUNT = 30;
 	public final int[][] unitToName = new int[MAX_COUNT][1];
 	public Map<Integer, TextureEntry> idToUnit = new Hashtable<Integer, TextureEntry>();
-	private Context context;
+	public Context context;
 	
 	public static class NoFreeTextureUnitsExcpetion extends Exception {}
 	

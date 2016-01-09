@@ -1,5 +1,7 @@
 package com.joe.proceduralgame.entities.characters;
 
+import android.media.MediaPlayer;
+
 import com.joe.proceduralgame.*;
 import com.joe.proceduralgame.Quad.Type;
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
@@ -20,6 +22,7 @@ public class SkeletonWarrior extends com.joe.proceduralgame.Character {
 	protected void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
 		texture = tex.referenceLoad(R.drawable.atlas_demo2);
 		quad = Quad.createDynamicQuad(Type.CHARACTER, new float[16], texture);
+		attackSound = MediaPlayer.create(tex.context, R.raw.axe_attack);
 		updateModelMatrix();
 	}
 

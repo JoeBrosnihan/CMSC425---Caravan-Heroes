@@ -32,6 +32,7 @@ public abstract class Character extends AttackableEntity {
 	 */
 	public boolean stateActionPerformed;
 	public boolean actedThisTurn = false;
+	public MediaPlayer attackSound;
 
 	public Quad quad;
 
@@ -94,6 +95,8 @@ public abstract class Character extends AttackableEntity {
 			dir = -1;
 		setState(STATE_ATTACKING);
 		attackTarget = target;
+		if (attackSound != null)
+			attackSound.start();
 	}
 
 	public void walkPath(LinkedList<int[]> path) {
