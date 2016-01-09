@@ -83,7 +83,9 @@ public class DungeonManager extends Thread {
 						//Return the attack
 						if (target instanceof Character) {
 							//TODO handle a combat transaction better
-							if (!((Character) target).isPlayerOwned()) {
+							if (phase == PLAYER_PHASE && !((Character) target).isPlayerOwned()) {
+								((Character) target).enqueueAction(Action.basicAttack, c);
+							} else if (phase == ENEMY_PHASE && ((Character) target).isPlayerOwned()) {
 								((Character) target).enqueueAction(Action.basicAttack, c);
 							}
 						}
