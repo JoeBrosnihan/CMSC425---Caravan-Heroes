@@ -4,6 +4,9 @@ import android.opengl.Matrix;
 
 import java.util.LinkedList;
 
+/**
+ * Represents an AttackableEntity that can move and possibly attack.
+ */
 public abstract class Character extends AttackableEntity {
 	
 	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2;
@@ -19,7 +22,13 @@ public abstract class Character extends AttackableEntity {
 	public float speed = 1.5f;
 	public int state = 0;
 	public long stateStartTime;
+	/**
+	 * Set to false every time state is changed.
+	 * Set to true to signify that the event associated with the state has been fired and should
+	 * not be fired again.
+	 */
 	public boolean stateActionPerformed;
+	public boolean actedThisTurn = false;
 
 	public Quad quad;
 
@@ -112,8 +121,16 @@ public abstract class Character extends AttackableEntity {
 		if (currentPath != null && !currentPath.isEmpty()) { //TODO at some point in development, currentPath should always be nonnull
 			int[] dest = currentPath.removeFirst();
 			walkTo(currentRoom.originx + dest[1], currentRoom.originz + dest[0]);
-			return;
+		} else {
+			finishAction();
 		}
+	}
+
+	/**
+	 * Called when the character is finished an action and wants to return to a waiting state.
+	 * Performs a queued action if there is one.
+	 */
+	public void finishAction() {
 		setState(STATE_WAITING);
 		Action.Pair pair = dequeueAction();
 		if (pair != null) {
@@ -129,7 +146,7 @@ public abstract class Character extends AttackableEntity {
 	 *
 	 * @param newState the Character's new state
 	 */
-	public void setState(int newState) {
+	private void setState(int newState) {
 		if (state != newState) {
 			stateActionPerformed = false;
 			state = newState;
@@ -145,13 +162,14 @@ public abstract class Character extends AttackableEntity {
 		return playerOwned;
 	}
 
+	@Override
 	public boolean ownsQuad(Quad quad) {
 		return quad == this.quad;
 	}
 
-	public void takeDamage(int damage) {
+	@Override
+	public void takeHit(Character attacker, int damage) {
 		//TODO take damage
-		//TODO correctly set textureUnit to the UI texture with the numbers
 		currentRoom.addDamageDisplay(new DamageDisplay(damage, quad.textureUnit, posx, posz));
 	}
 

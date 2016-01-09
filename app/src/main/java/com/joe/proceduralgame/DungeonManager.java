@@ -99,13 +99,21 @@ public class DungeonManager extends Thread {
 				if (!c.stateActionPerformed) {
 					if (time - c.stateStartTime >= c.attackHitTime) {
 						int damage = 27; //TODO calculate damage
-						c.getAttackTarget().takeDamage(damage);
+						AttackableEntity target = c.getAttackTarget();
+						target.takeHit(c, damage);
 						c.stateActionPerformed = true;
+						//Return the attack
+						if (target instanceof Character) {
+							//TODO handle a combat transaction better
+							if (!((Character) target).isPlayerOwned()) {
+								((Character) target).enqueueAction(Action.basicAttack, c);
+								((Character) target).walkTo(target.posx, target.posz);
+							}
+						}
 					}
 				} else {
-					if (time - c.stateStartTime >= c.attackAnimationTime) {
-						c.setState(Character.STATE_WAITING);
-					}
+					if (time - c.stateStartTime >= c.attackAnimationTime)
+						c.finishAction();
 				}
 			}
 		}

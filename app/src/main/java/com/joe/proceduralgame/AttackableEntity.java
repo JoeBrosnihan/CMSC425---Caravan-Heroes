@@ -9,6 +9,12 @@ public abstract class AttackableEntity extends Entity {
         setDefaultAction(Action.basicAttack);
     }
 
-    public abstract void takeDamage(int damage);
+    /**
+     * Called when a Character attacks this entity
+     *
+     * @param attacker
+     * @param damage
+     */
+    public abstract void takeHit(Character attacker, int damage);
 
 }
