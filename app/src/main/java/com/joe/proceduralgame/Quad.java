@@ -57,6 +57,8 @@ public class Quad {
 	}
 
 	public static void loadBuffer() {
+		if (vertexBuffer != null)
+			return;
 		// initialize vertex byte buffer for shape coordinates
 		ByteBuffer bb = ByteBuffer.allocateDirect(
 		// (# of coordinate values * 4 bytes per float)
