@@ -1,5 +1,6 @@
 package com.joe.proceduralgame;
 
+import android.media.MediaPlayer;
 import android.opengl.Matrix;
 
 import java.util.LinkedList;
@@ -9,13 +10,15 @@ import java.util.LinkedList;
  */
 public abstract class Character extends AttackableEntity {
 	
-	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2;
+	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2,
+			STATE_TAKING_DAMAGE = 3;
 	public static final float TILT_ANGLE = 45f, VERTICAL_OFFSET = .25f, GROUND_LEVEL = .05f;
 	
 	protected float offsetX = 0, scaleX = 1, scaleY = 1;
 
 	public final int attackHitTime;
 	public final int attackAnimationTime;
+	public final int takingDamageAnimationTime;
 
 	public float destx, destz;
 	public int dir = 1;
@@ -46,11 +49,13 @@ public abstract class Character extends AttackableEntity {
 	 * @param attackHitTime the time of the frame on which this character's basic attack connects
 	 *                      in ms
 	 * @param attackAnimationTime the length of the basic attack animation in ms
+	 * @param takingDamageAnimationTime the length of the taking damage animation in ms
 	 */
-	public Character(int attackHitTime, int attackAnimationTime) {
+	public Character(int attackHitTime, int attackAnimationTime, int takingDamageAnimationTime) {
 		super();
 		this.attackHitTime = attackHitTime;
 		this.attackAnimationTime = attackAnimationTime;
+		this.takingDamageAnimationTime = takingDamageAnimationTime;
 	}
 	
 	@Override
@@ -170,6 +175,11 @@ public abstract class Character extends AttackableEntity {
 	@Override
 	public void takeHit(Character attacker, int damage) {
 		//TODO take damage
+		if (attacker.posx < posx)
+			dir = -1;
+		if (attacker.posx > posx)
+			dir = 1;
+		setState(STATE_TAKING_DAMAGE);
 		currentRoom.addDamageDisplay(new DamageDisplay(damage, quad.textureUnit, posx, posz));
 	}
 

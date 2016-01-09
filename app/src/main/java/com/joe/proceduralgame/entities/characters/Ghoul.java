@@ -1,20 +1,19 @@
 package com.joe.proceduralgame.entities.characters;
 
-import android.opengl.GLES20;
-
 import com.joe.proceduralgame.*;
 import com.joe.proceduralgame.Quad.Type;
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class Ghoul extends com.joe.proceduralgame.Character {
 	
-	private final int nCol = 8;
+	private static final int N_COL = 8, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 1600,
+			TAKING_DAMAGE_ANIMATION_TIME = 800;
 
 	private int texture;
 	private int atlasIndex = 0;
 
 	public Ghoul() {
-		super(300, 500);
+		super(ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME);
 	}
 
 	@Override
@@ -37,6 +36,17 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 			else
 				newIndex = 25;
 			break;
+		case STATE_TAKING_DAMAGE:
+			animTime = System.currentTimeMillis() - stateStartTime;
+			if (animTime < 400) {
+				if (animTime % 160 >= 120)
+					return;
+				else
+					newIndex = 24;
+			} else {
+				newIndex = 24;
+			}
+			break;
 		}
 
 		synchronized (this) {
@@ -53,10 +63,10 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 				}
 			}
 			
-			quad.uvOrigin[0] = (newIndex % nCol) / (float) nCol; // u coord
-			quad.uvOrigin[1] = (newIndex / nCol) / (float) nCol; // v coord
-			quad.uvScale[0] = scaleX / (float) nCol; // u scale
-			quad.uvScale[1] = scaleY / (float) nCol; // v scale
+			quad.uvOrigin[0] = (newIndex % N_COL) / (float) N_COL; // u coord
+			quad.uvOrigin[1] = (newIndex / N_COL) / (float) N_COL; // v coord
+			quad.uvScale[0] = scaleX / (float) N_COL; // u scale
+			quad.uvScale[1] = scaleY / (float) N_COL; // v scale
 			quad.draw(shaderProgram, mVPMatrix);
 		}
 	}

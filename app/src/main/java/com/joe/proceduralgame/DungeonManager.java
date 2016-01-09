@@ -95,6 +95,9 @@ public class DungeonManager extends Thread {
 		for (Character c : currentRoom.characters) {
 			if (c.state == Character.STATE_WALKING) {
 				c.move(dt);
+			} else if (c.state == Character.STATE_TAKING_DAMAGE) {
+				if (time - c.stateStartTime >= c.takingDamageAnimationTime)
+					c.finishAction();
 			} else if (c.state == Character.STATE_ATTACKING) {
 				if (!c.stateActionPerformed) {
 					if (time - c.stateStartTime >= c.attackHitTime) {
@@ -107,7 +110,6 @@ public class DungeonManager extends Thread {
 							//TODO handle a combat transaction better
 							if (!((Character) target).isPlayerOwned()) {
 								((Character) target).enqueueAction(Action.basicAttack, c);
-								((Character) target).walkTo(target.posx, target.posz);
 							}
 						}
 					}

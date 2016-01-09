@@ -1,7 +1,5 @@
 package com.joe.proceduralgame.entities.characters;
 
-import android.opengl.GLES20;
-
 import com.joe.proceduralgame.*;
 import com.joe.proceduralgame.Quad.Type;
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
@@ -14,7 +12,7 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 	private int atlasIndex = 0;
 
 	public Swordsman() {
-		super(250, 450);
+		super(250, 450, 0);
 	}
 
 	@Override
