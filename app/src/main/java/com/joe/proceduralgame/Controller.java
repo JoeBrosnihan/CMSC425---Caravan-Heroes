@@ -56,15 +56,14 @@ public class Controller {
 								}
 							}
 						}
-					}else if (targetQuad.type == Type.FLOOR) {
+					} else if (targetQuad.type == Type.FLOOR) {
 						if (selectedCharacter != null) {
 							int targetRow = (int) Math.round(targetQuad.getZ() - room.originz);
 							int targetCol = (int) Math.round(targetQuad.getX() - room.originx);
 							LinkedList<int[]> path = room.findPath(selectedCharacter.gridRow,
 									selectedCharacter.gridCol, targetRow, targetCol, true);
 							if (path != null) {
-								selectedCharacter.clearAction();
-								selectedCharacter.walkPath(path);
+								manager.commandMove(selectedCharacter, path);
 							}
 						}
 					}

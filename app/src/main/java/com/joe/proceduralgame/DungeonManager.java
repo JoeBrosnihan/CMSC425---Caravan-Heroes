@@ -92,7 +92,7 @@ public class DungeonManager extends Thread {
 	 * Commands the actor to walk a path then perform an action on a target.
 	 *
 	 * @param actor the Character that will perform the action
-	 * @param path path to walk before performing the action
+	 * @param path LinkedList of length 2 int[]s {row, col} corresponding to squares to walk along
 	 * @param action the action the Character will perform after the path has been walked
 	 * @param target the target of the action
 	 */
@@ -103,6 +103,22 @@ public class DungeonManager extends Thread {
 			assert (!actor.actedThisTurn);
 		}
 		actor.enqueueAction(action, target);
+		actor.walkPath(path);
+	}
+
+	/**
+	 * Commands the actor to walk a path
+	 *
+	 * @param actor the Character that will walk the path
+	 * @param path LinkedList of length 2 int[]s {row, col} corresponding to squares to walk along
+	 */
+	public void commandMove(Character actor, LinkedList<int[]> path) {
+		if (!neutral) {
+			if (actor.isPlayerOwned())
+				assert (phase == PLAYER_PHASE);
+			assert (!actor.actedThisTurn);
+		}
+		actor.clearAction();
 		actor.walkPath(path);
 	}
 
