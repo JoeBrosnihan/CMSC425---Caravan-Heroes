@@ -18,13 +18,17 @@ public class DungeonManager extends Thread {
 	Character leader;
 	Room currentRoom;
 	
-	/***
+	/**
 	 * true if the player is in a room free of danger and can act freely.
 	 */
-	boolean neutral = true;
+	boolean neutral = false;
 	int phase = PLAYER_PHASE;
 
 	private boolean waitingToEndPhase = false;
+	/**
+	 * The last commanded player owned Character
+	 */
+	private Character lastPlayerCommandedCharacter = null;
 
 	public DungeonManager(TextureManager manager) {
 		this.textureManager = manager;
@@ -56,9 +60,13 @@ public class DungeonManager extends Thread {
 		currentRoom.addCharacter(enemy2);
 	}
 	
-	public void update(float dt) {
+	public void update(float dt) { // TODO synchronize with touch events that affect the manager
 		long time = System.currentTimeMillis();
+		boolean allWaiting = true;
 		for (Character c : currentRoom.characters) {
+			if (c.state != Character.STATE_WAITING)
+				allWaiting = false;
+
 			if (c.state == Character.STATE_WALKING) {
 				c.move(dt);
 			} else if (c.state == Character.STATE_TAKING_DAMAGE) {
@@ -86,6 +94,84 @@ public class DungeonManager extends Thread {
 				}
 			}
 		}
+
+		if (!neutral && allWaiting) {
+			if (waitingToEndPhase)
+				endPhase();
+			else if (phase == ENEMY_PHASE)
+				makeEnemyMove();
+		}
+	}
+
+	/**
+	 * Called to end the current phase
+	 */
+	public void endPhase() {
+		waitingToEndPhase = false;
+		for (Character c : currentRoom.characters) {
+			c.actedThisTurn = false;
+		}
+		if (phase == PLAYER_PHASE)
+			beginPhase(ENEMY_PHASE);
+		else if (phase == ENEMY_PHASE)
+			beginPhase(PLAYER_PHASE);
+	}
+
+	/**
+	 * Begins the next phase
+	 *
+	 * @param newPhase the phase type id e.g. player, enemy
+	 */
+	private void beginPhase(int newPhase) {
+		phase = newPhase;
+		if (phase == PLAYER_PHASE) {
+			if (lastPlayerCommandedCharacter != null) {
+				dungeonRenderer.setFocus(lastPlayerCommandedCharacter);
+			} else {
+				for (Character c : currentRoom.characters) {
+					if (c.isPlayerOwned()) {
+						dungeonRenderer.setFocus(c);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Issue an enemy command.
+	 *
+	 * This method is called every time all units are waiting repeatedly until the enemy phase is
+	 * over.
+	 */
+	private void makeEnemyMove() {
+		Character actor = null;
+		for (Character c : currentRoom.characters) {
+			if (!c.isPlayerOwned() && !c.actedThisTurn) {
+				actor = c;
+				break;
+			}
+		}
+		if (actor == null)
+			return;
+
+
+		Character target = null;
+		for (Character c : currentRoom.characters) {
+			if (c.isPlayerOwned()) {
+				target = c;
+				break;
+			}
+		}
+		if (target == null)
+			return;
+
+		LinkedList<int[]> path = currentRoom.findPath(actor.gridRow, actor.gridCol, target.gridRow,
+				target.gridCol, false);
+		if (path == null)
+			return;
+
+		commandAction(actor, path, Action.basicAttack, target);
 	}
 
 	/**
@@ -102,8 +188,11 @@ public class DungeonManager extends Thread {
 				assert (phase == PLAYER_PHASE);
 			assert (!actor.actedThisTurn);
 		}
+		dungeonRenderer.setFocus(actor);
 		actor.enqueueAction(action, target);
 		actor.walkPath(path);
+		if (actor.isPlayerOwned())
+			lastPlayerCommandedCharacter = actor;
 	}
 
 	/**
@@ -118,17 +207,39 @@ public class DungeonManager extends Thread {
 				assert (phase == PLAYER_PHASE);
 			assert (!actor.actedThisTurn);
 		}
+		dungeonRenderer.setFocus(actor);
 		actor.clearAction();
 		actor.walkPath(path);
+		if (actor.isPlayerOwned())
+			lastPlayerCommandedCharacter = actor;
 	}
 
 	/**
-	 * Marks a character as having acted this turn.
+	 * Marks a character as having acted this turn if not in neutral.
 	 *
 	 * @param character the Character that acted
 	 */
 	private void markCharacterActed(Character character) {
+		if (neutral)
+			return;
 		character.actedThisTurn = true;
+
+		boolean readyToEnd = true;
+		for (Character c : currentRoom.characters) {
+			if (phase == PLAYER_PHASE) {
+				if (c.isPlayerOwned() && !c.actedThisTurn) {
+					readyToEnd = false;
+					break;
+				}
+			} else if (phase == ENEMY_PHASE) {
+				if (!c.isPlayerOwned() && !c.actedThisTurn) {
+					readyToEnd = false;
+					break;
+				}
+			}
+		}
+		if (readyToEnd)
+			waitingToEndPhase = true;
 	}
 
 	/**
