@@ -24,13 +24,14 @@ public class GameGLView extends GLSurfaceView {
 		textureManager = new TextureManager(context);
 		
 		dungeonManager = new DungeonManager(textureManager);
-		dungeonManager.start();
 		
 		gameRenderer = new DungeonRenderer(this, dungeonManager, textureManager);
 		setRenderer(gameRenderer);
 
 		gameController = new Controller(this, gameRenderer, dungeonManager);
 		gameRenderer.gameController = gameController;
+
+		dungeonManager.start();
 	}
 
 	public boolean onTouchEvent(MotionEvent e) {

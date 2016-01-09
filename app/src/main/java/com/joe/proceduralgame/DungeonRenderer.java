@@ -15,10 +15,11 @@ import com.joe.proceduralgame.Quad.Type;
 import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class DungeonRenderer implements GLSurfaceView.Renderer {
-	
-	public static final int COORDS_PER_VERTEX = 2;
+
 	public static final float NEAR_PLANE = 1;
 	public static final float CAMERA_ANGLE = 60;
+	//The fraction of the distance to the focus covered in one second
+	public static final float CAMERA_SPEED = .90f;
 	
 	private GameGLView gameView;
 	private TextureManager textureManager;
@@ -32,7 +33,9 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	final float[] mViewMatrix = new float[16];
 	private float fov = 45;
 	public float nearWidth, nearHeight;
-	float camx, camy, camz;
+	float camx, camy = 8, camz;
+	private Entity focus;
+	private long lastDrawTime;
 	
 	private Quad characterSelector;
 	private int uiTextureUnit;
@@ -94,13 +97,17 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 	}
 
+	public void setFocus(Entity focus) {
+		synchronized (this) {
+			this.focus = focus;
+		}
+	}
+
 	public void onDrawFrame(GL10 unused) {
-		double t = System.currentTimeMillis() / 1000.0;
-		
+		long time = System.currentTimeMillis();
+		double dt = (time - lastDrawTime) / 1000.0;
 		// Set the camera position (View matrix)
-		camy = 8;
-		camx = dungeonManager.leader.posx;
-		camz = dungeonManager.leader.posz;
+		updateCamera(dt);
 	    
 	    Matrix.setIdentityM(mViewMatrix, 0);
 	    Matrix.translateM(mViewMatrix, 0, 0, 0, -camy);
@@ -116,7 +123,32 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		
 		draw();
 	    catchGLError();
-		
+
+		lastDrawTime = time;
+	}
+
+	/**
+	 * Adjusts the camera's position
+	 *
+	 * @param dt time elapsed since last frame in seconds
+	 */
+	private void updateCamera(double dt) {
+		float deltax, deltaz;
+		synchronized (this) {
+			if (focus == null)
+				return;
+			deltax = focus.posx - camx;
+			deltaz = focus.posz - camz;
+		}
+		double dist = Math.hypot(deltax, deltaz);
+		if (dist < .001f) {
+			camx += deltax;
+			camz += deltaz;
+		} else {
+			float factor = (float) Math.pow(1 - CAMERA_SPEED, dt);
+			camx += deltax * (1 - factor);
+			camz += deltaz * (1 - factor);
+		}
 	}
 	
 	private void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
@@ -188,7 +220,8 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
+		lastDrawTime = System.currentTimeMillis();
 	}
 
 }

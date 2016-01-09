@@ -5,7 +5,6 @@ import com.joe.proceduralgame.entities.characters.SkeletonWarrior;
 import com.joe.proceduralgame.entities.characters.Swordsman;
 
 public class DungeonManager extends Thread {
-
 	private TextureManager textureManager;
 	
 	boolean running = false;

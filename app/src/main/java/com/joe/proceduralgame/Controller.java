@@ -1,8 +1,3 @@
-
-
-
-
-
 package com.joe.proceduralgame;
 
 import com.joe.proceduralgame.Quad.Type;
@@ -24,6 +19,11 @@ public class Controller {
 		this.manager = manager;
 	}
 
+	private void selectCharacter(Character character) {
+		selectedCharacter = character;
+		renderer.setFocus(character);
+	}
+
 	public boolean onTouchEvent(MotionEvent e) {
 		Room room = manager.currentRoom;
 		
@@ -38,7 +38,7 @@ public class Controller {
 							if (targetQuad.type == Type.CHARACTER) {
 								Character character = RaycastUtils.quadToCharacter(room, targetQuad);
 								if (character.isPlayerOwned())
-									selectedCharacter = character;
+									selectCharacter(character);
 							}
 						} else {
 							Entity targetEntity = RaycastUtils.quadToEntity(room, targetQuad);
