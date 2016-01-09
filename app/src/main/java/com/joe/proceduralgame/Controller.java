@@ -50,10 +50,8 @@ public class Controller {
 											selectedCharacter.gridCol, targetEntity.gridRow,
 											targetEntity.gridCol, false);
 									if (path != null) { //if there is a free square
-										selectedCharacter.enqueueAction(targetEntity.getDefaultAction(), targetEntity);
-										//begin moving to square
-										selectedCharacter.walkPath(path);
-										//action gets triggered when they arrive
+										manager.commandAction(selectedCharacter, path,
+												Action.basicAttack, targetEntity);
 									}
 								}
 							}

@@ -4,7 +4,12 @@ import com.joe.proceduralgame.entities.characters.Ghoul;
 import com.joe.proceduralgame.entities.characters.SkeletonWarrior;
 import com.joe.proceduralgame.entities.characters.Swordsman;
 
+import java.util.LinkedList;
+
 public class DungeonManager extends Thread {
+	public static final int PLAYER_PHASE = 0, ENEMY_PHASE = 1;
+
+	private DungeonRenderer dungeonRenderer;
 	private TextureManager textureManager;
 	
 	boolean running = false;
@@ -17,6 +22,9 @@ public class DungeonManager extends Thread {
 	 * true if the player is in a room free of danger and can act freely.
 	 */
 	boolean neutral = true;
+	int phase = PLAYER_PHASE;
+
+	private boolean waitingToEndPhase = false;
 
 	public DungeonManager(TextureManager manager) {
 		this.textureManager = manager;
@@ -42,51 +50,10 @@ public class DungeonManager extends Thread {
 		enemy.posz = 2;
 		currentRoom.addCharacter(enemy);
 		
-		Thread moveDummy = new Thread() {
-			public void run() {
-				while (true) {
-					try {
-						enemy.walkTo(4, 2);
-						sleep(2000);
-						enemy.walkTo(4, 4);
-						sleep(2000);
-						enemy.walkTo(2, 4);
-						sleep(1900);
-						enemy.walkTo(2, 2);
-						sleep(4000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-		//moveDummy.start();
-		
 		final Character enemy2 = new SkeletonWarrior();
 		enemy2.posx = 3;
 		enemy2.posz = 2;
 		currentRoom.addCharacter(enemy2);
-		
-		Thread moveDummy2 = new Thread() {
-			public void run() {
-				while (true) {
-					try {
-						enemy2.walkTo(3, 1);
-						sleep(2500);
-						enemy2.walkTo(3, 3);
-						sleep(2000);
-						enemy2.walkTo(1, 3);
-						sleep(2000);
-						enemy2.walkTo(1, 1);
-						sleep(4000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-		//moveDummy2.start();
-		
 	}
 	
 	public void update(float dt) {
@@ -104,6 +71,7 @@ public class DungeonManager extends Thread {
 						AttackableEntity target = c.getAttackTarget();
 						target.takeHit(c, damage);
 						c.stateActionPerformed = true;
+						markCharacterActed(c);
 						//Return the attack
 						if (target instanceof Character) {
 							//TODO handle a combat transaction better
@@ -118,6 +86,42 @@ public class DungeonManager extends Thread {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Commands the actor to walk a path then perform an action on a target.
+	 *
+	 * @param actor the Character that will perform the action
+	 * @param path path to walk before performing the action
+	 * @param action the action the Character will perform after the path has been walked
+	 * @param target the target of the action
+	 */
+	public void commandAction(Character actor, LinkedList<int[]> path, Action action, Entity target) {
+		if (!neutral) {
+			if (actor.isPlayerOwned())
+				assert (phase == PLAYER_PHASE);
+			assert (!actor.actedThisTurn);
+		}
+		actor.enqueueAction(action, target);
+		actor.walkPath(path);
+	}
+
+	/**
+	 * Marks a character as having acted this turn.
+	 *
+	 * @param character the Character that acted
+	 */
+	private void markCharacterActed(Character character) {
+		character.actedThisTurn = true;
+	}
+
+	/**
+	 * Sets the dungeon renderer so this thread can send it information
+	 *
+	 * @param renderer the current dungeon renderer
+	 */
+	public void setDungeonRenderer(DungeonRenderer renderer) {
+		this.dungeonRenderer = renderer;
 	}
 
 	public void run() {

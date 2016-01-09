@@ -26,6 +26,7 @@ public class GameGLView extends GLSurfaceView {
 		dungeonManager = new DungeonManager(textureManager);
 		
 		gameRenderer = new DungeonRenderer(this, dungeonManager, textureManager);
+		dungeonManager.setDungeonRenderer(gameRenderer);
 		setRenderer(gameRenderer);
 
 		gameController = new Controller(this, gameRenderer, dungeonManager);
