@@ -6,7 +6,7 @@ import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class Ghoul extends com.joe.proceduralgame.Character {
 	
-	private static final int N_COL = 8, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 1600,
+	private static final int N_COL = 8, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
 			TAKING_DAMAGE_ANIMATION_TIME = 800;
 
 	private int texture;
@@ -36,6 +36,15 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 			else
 				newIndex = 25;
 			break;
+		case STATE_ATTACKING:
+			animTime = System.currentTimeMillis() - stateStartTime;
+			if (animTime < 200)
+				newIndex = 18;
+			else if (animTime < 400)
+				newIndex = 28;
+			else
+				newIndex = 30;
+			break;
 		case STATE_TAKING_DAMAGE:
 			animTime = System.currentTimeMillis() - stateStartTime;
 			if (animTime < 400) {
@@ -55,8 +64,16 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 				switch (newIndex) {
 				case 24:
 				case 25: // waiting/walking, standard
+				case 18: // attack, 1x1
 					offsetX = 0;
 					scaleX = 1;
+					scaleY = 1;
+					updateModelMatrix();
+					break;
+				case 28:
+				case 30: // attack, outstretched
+					offsetX = .5f;
+					scaleX = 2;
 					scaleY = 1;
 					updateModelMatrix();
 					break;
