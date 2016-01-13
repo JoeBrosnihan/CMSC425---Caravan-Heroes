@@ -127,8 +127,8 @@ public class Room {
 		return;
 	}
 	
-	private int hashUV(float[] uv) {
-		return (int) (1000 * (uv[0] + 1000 * uv[1]));
+	private int hashUV(float[] uvOrigin, float[] uvScale) {
+		return (int) (uvScale[0] + 128 * (uvScale[1] + 128 * (uvOrigin[0] + 128 * uvOrigin[1])));
 	}
 	
 	private void loadStaticGeometry(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
@@ -144,7 +144,7 @@ public class Room {
 				if (comp != 0) {
 					return comp;
 				} else {
-					return hashUV(lhs.uvOrigin) - hashUV(rhs.uvOrigin);
+					return hashUV(lhs.uvOrigin, lhs.uvScale) - hashUV(rhs.uvOrigin, lhs.uvScale);
 				}
 			}
 		});
@@ -153,7 +153,7 @@ public class Room {
 		int currentUVHash = -1;
 		// set not equal for convenience
 		currentTextureID = staticQuads.get(0).textureID - 1;
-		currentUVHash = hashUV(staticQuads.get(0).uvOrigin) - 1;
+		currentUVHash = hashUV(staticQuads.get(0).uvOrigin, staticQuads.get(0).uvScale) - 1;
 			
 		//count size for tex and uv arrays
 		int nUniqueTextures = 0;
@@ -164,9 +164,9 @@ public class Room {
 				nUniqueTextures++;
 				currentTextureID = q.textureID;
 			}
-			if (hashUV(q.uvOrigin) != currentUVHash) {
+			if (hashUV(q.uvOrigin, q.uvScale) != currentUVHash) {
 				nUniqueUVs++;
-				currentUVHash = hashUV(q.uvOrigin);
+				currentUVHash = hashUV(q.uvOrigin, q.uvScale);
 			}
 		}
 		quadModels = new float[staticQuads.size()][16];
@@ -178,8 +178,8 @@ public class Room {
 		
 		// set not equal to the first element for convenience
 		currentTextureID = staticQuads.get(0).textureID - 1;
-		currentUVHash = hashUV(staticQuads.get(0).uvOrigin) - 1;
-		
+		currentUVHash = hashUV(staticQuads.get(0).uvOrigin, staticQuads.get(0).uvScale) - 1;
+
 		// current slots in index arrays
 		int iTex = -1;
 		int iUV = -1;
@@ -195,9 +195,9 @@ public class Room {
 				textureIndices[iTex] = i;
 			}
 			
-			if (hashUV(q.uvOrigin) != currentUVHash) {
+			if (hashUV(q.uvOrigin, q.uvScale) != currentUVHash) {
 				iUV++;
-				currentUVHash = hashUV(q.uvOrigin);
+				currentUVHash = hashUV(q.uvOrigin, q.uvScale);
 				uvOrigins[iUV] = q.uvOrigin;
 				uvScales[iUV] = q.uvScale; // assume square
 				uvIndices[iUV] = i;
