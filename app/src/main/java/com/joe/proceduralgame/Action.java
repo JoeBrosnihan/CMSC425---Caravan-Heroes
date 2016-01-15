@@ -50,13 +50,12 @@ public abstract class Action {
         /**
          * @param actor any Character
          * @param object any AttackableEntity
-         * @return true iff not both actor and object are player units
+         * @return true iff the actor and the object are in different groups
          */
         @Override
         public boolean canPerform(Character actor, Entity object) {
             if (object instanceof Character)
-                //verify not both units are the player's
-                return !(actor.isPlayerOwned() && ((Character) object).isPlayerOwned());
+                return actor.getGroupID() != ((Character) object).getGroupID();
             else
                 return true;
         }

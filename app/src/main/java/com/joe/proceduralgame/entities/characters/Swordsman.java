@@ -7,14 +7,14 @@ import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class Swordsman extends com.joe.proceduralgame.Character {
 
-	private static final int N_COL = 8, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
+	private static final int N_COL = 8, GROUP = GROUP_PLAYER, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
 			TAKING_DAMAGE_ANIMATION_TIME = 800;
 
 	private int texture;
 	private int atlasIndex = 0;
 
 	public Swordsman() {
-		super(ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME);
+		super(GROUP, ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME);
 	}
 
 	@Override

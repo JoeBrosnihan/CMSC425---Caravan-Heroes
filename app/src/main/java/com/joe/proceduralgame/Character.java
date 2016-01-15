@@ -9,7 +9,7 @@ import java.util.LinkedList;
  * Represents an AttackableEntity that can move and possibly attack.
  */
 public abstract class Character extends AttackableEntity {
-	
+	public static final int GROUP_PLAYER = 0, GROUP_ENEMY = 1;
 	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2,
 			STATE_TAKING_DAMAGE = 3;
 	public static final float TILT_ANGLE = 45f, VERTICAL_OFFSET = .25f, GROUND_LEVEL = .05f;
@@ -39,21 +39,24 @@ public abstract class Character extends AttackableEntity {
 	//Action, target pair to be executed when the Character reaches its destination
 	private Action.Pair queuedAction = null;
 	private LinkedList<int[]> currentPath = null;
-	private boolean playerOwned = false;
 	//The entity that the Character is currently attacking
 	//Set to the target every time attack(target) is called. TODO maybe set to null when done?
 	private AttackableEntity attackTarget;
+	//An integer representing the group, or team, this unit is on
+	private int groupID;
 
 	/**
 	 * Creates a new character with the given parameters
 	 *
+	 * @param groupID the id of the group this character falls into
 	 * @param attackHitTime the time of the frame on which this character's basic attack connects
 	 *                      in ms
 	 * @param attackAnimationTime the length of the basic attack animation in ms
 	 * @param takingDamageAnimationTime the length of the taking damage animation in ms
 	 */
-	public Character(int attackHitTime, int attackAnimationTime, int takingDamageAnimationTime) {
+	public Character(int groupID, int attackHitTime, int attackAnimationTime, int takingDamageAnimationTime) {
 		super();
+		this.groupID = groupID;
 		this.attackHitTime = attackHitTime;
 		this.attackAnimationTime = attackAnimationTime;
 		this.takingDamageAnimationTime = takingDamageAnimationTime;
@@ -167,7 +170,7 @@ public abstract class Character extends AttackableEntity {
 	}
 	
 	public boolean isPlayerOwned() {
-		return playerOwned;
+		return groupID == GROUP_PLAYER;
 	}
 
 	@Override
@@ -186,10 +189,6 @@ public abstract class Character extends AttackableEntity {
 		currentRoom.addDamageDisplay(new DamageDisplay(damage, quad.textureUnit, posx, posz));
 	}
 
-	public void setPlayerOwned(boolean val) {
-		playerOwned = val;
-	}
-
 	/**
 	 * Gets the target entity this character is currently attacking.
 	 *
@@ -198,6 +197,13 @@ public abstract class Character extends AttackableEntity {
 	 */
 	public AttackableEntity getAttackTarget() {
 		return attackTarget;
+	}
+
+	/**
+	 * Gets the id of the group this character is in
+	 */
+	public int getGroupID() {
+		return groupID;
 	}
 
 	/**

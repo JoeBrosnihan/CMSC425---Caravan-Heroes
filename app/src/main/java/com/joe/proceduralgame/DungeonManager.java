@@ -7,7 +7,6 @@ import com.joe.proceduralgame.entities.characters.Swordsman;
 import java.util.LinkedList;
 
 public class DungeonManager extends Thread {
-	public static final int PLAYER_PHASE = 0, ENEMY_PHASE = 1;
 
 	private DungeonRenderer dungeonRenderer;
 	private TextureManager textureManager;
@@ -22,7 +21,7 @@ public class DungeonManager extends Thread {
 	 * true if the player is in a room free of danger and can act freely.
 	 */
 	boolean neutral = false;
-	int phase = PLAYER_PHASE;
+	private int phaseGroup = Character.GROUP_PLAYER;
 
 	private boolean waitingToEndPhase = false;
 	/**
@@ -47,7 +46,6 @@ public class DungeonManager extends Thread {
 		
 		leader = new Swordsman();
 		currentRoom.addCharacter(leader);
-		leader.setPlayerOwned(true);
 		
 		final Character enemy = new Ghoul();
 		enemy.posx = 2;
@@ -75,7 +73,7 @@ public class DungeonManager extends Thread {
 			} else if (c.state == Character.STATE_ATTACKING) {
 				if (!c.stateActionPerformed) {
 					if (time - c.stateStartTime >= c.attackHitTime) {
-						int damage = 27; //TODO calculate damage
+						int damage = 666; //TODO calculate damage
 						AttackableEntity target = c.getAttackTarget();
 						target.takeHit(c, damage);
 						c.stateActionPerformed = true;
@@ -83,10 +81,11 @@ public class DungeonManager extends Thread {
 						//Return the attack
 						if (target instanceof Character) {
 							//TODO handle a combat transaction better
-							if (phase == PLAYER_PHASE && !((Character) target).isPlayerOwned()) {
-								((Character) target).enqueueAction(Action.basicAttack, c);
-							} else if (phase == ENEMY_PHASE && ((Character) target).isPlayerOwned()) {
-								((Character) target).enqueueAction(Action.basicAttack, c);
+							//Target returns the attack if the target didn't initiate it this turn
+							Character targetCharacter = (Character) target;
+							if (targetCharacter.getGroupID() != phaseGroup) {
+								if (Action.basicAttack.canPerform(targetCharacter, c))
+									targetCharacter.enqueueAction(Action.basicAttack, c);
 							}
 						}
 					}
@@ -100,33 +99,33 @@ public class DungeonManager extends Thread {
 		if (!neutral && allWaiting) {
 			if (waitingToEndPhase)
 				endPhase();
-			else if (phase == ENEMY_PHASE)
+			else if (phaseGroup == Character.GROUP_ENEMY)
 				makeEnemyMove();
 		}
 	}
 
 	/**
-	 * Called to end the current phase
+	 * Called to end the current phaseGroup
 	 */
 	public void endPhase() {
 		waitingToEndPhase = false;
 		for (Character c : currentRoom.characters) {
 			c.actedThisTurn = false;
 		}
-		if (phase == PLAYER_PHASE)
-			beginPhase(ENEMY_PHASE);
-		else if (phase == ENEMY_PHASE)
-			beginPhase(PLAYER_PHASE);
+		if (phaseGroup == Character.GROUP_PLAYER)
+			beginPhase(Character.GROUP_ENEMY);
+		else if (phaseGroup == Character.GROUP_ENEMY)
+			beginPhase(Character.GROUP_PLAYER);
 	}
 
 	/**
-	 * Begins the next phase
+	 * Begins the next group's phase
 	 *
-	 * @param newPhase the phase type id e.g. player, enemy
+	 * @param newPhaseGroup the group id of the group of the next phase e.g. player, enemy
 	 */
-	private void beginPhase(int newPhase) {
-		phase = newPhase;
-		if (phase == PLAYER_PHASE) {
+	private void beginPhase(int newPhaseGroup) {
+		phaseGroup = newPhaseGroup;
+		if (phaseGroup == Character.GROUP_PLAYER) {
 			if (lastPlayerCommandedCharacter != null) {
 				dungeonRenderer.setFocus(lastPlayerCommandedCharacter);
 			} else {
@@ -143,13 +142,13 @@ public class DungeonManager extends Thread {
 	/**
 	 * Issue an enemy command.
 	 *
-	 * This method is called every time all units are waiting repeatedly until the enemy phase is
+	 * This method is called every time all units are waiting repeatedly until the enemy phaseGroup is
 	 * over.
 	 */
 	private void makeEnemyMove() {
 		Character actor = null;
 		for (Character c : currentRoom.characters) {
-			if (!c.isPlayerOwned() && !c.actedThisTurn) {
+			if (c.getGroupID() == Character.GROUP_ENEMY && !c.actedThisTurn) {
 				actor = c;
 				break;
 			}
@@ -186,9 +185,8 @@ public class DungeonManager extends Thread {
 	 */
 	public void commandAction(Character actor, LinkedList<int[]> path, Action action, Entity target) {
 		if (!neutral) {
-			if (actor.isPlayerOwned())
-				assert (phase == PLAYER_PHASE);
-			assert (!actor.actedThisTurn);
+			assert actor.getGroupID() == phaseGroup;
+			assert !actor.actedThisTurn;
 		}
 		dungeonRenderer.setFocus(actor);
 		actor.enqueueAction(action, target);
@@ -205,9 +203,8 @@ public class DungeonManager extends Thread {
 	 */
 	public void commandMove(Character actor, LinkedList<int[]> path) {
 		if (!neutral) {
-			if (actor.isPlayerOwned())
-				assert (phase == PLAYER_PHASE);
-			assert (!actor.actedThisTurn);
+			assert actor.getGroupID() == phaseGroup;
+			assert !actor.actedThisTurn;
 		}
 		dungeonRenderer.setFocus(actor);
 		actor.clearAction();
@@ -228,13 +225,8 @@ public class DungeonManager extends Thread {
 
 		boolean readyToEnd = true;
 		for (Character c : currentRoom.characters) {
-			if (phase == PLAYER_PHASE) {
-				if (c.isPlayerOwned() && !c.actedThisTurn) {
-					readyToEnd = false;
-					break;
-				}
-			} else if (phase == ENEMY_PHASE) {
-				if (!c.isPlayerOwned() && !c.actedThisTurn) {
+			if (c.getGroupID() == phaseGroup) {
+				if (!c.actedThisTurn) {
 					readyToEnd = false;
 					break;
 				}
@@ -242,6 +234,15 @@ public class DungeonManager extends Thread {
 		}
 		if (readyToEnd)
 			waitingToEndPhase = true;
+	}
+
+	/**
+	 * Gets the group id of the current phase's character group.
+	 *
+	 * Characters with this group id may act during this phase.
+	 */
+	public int getPhaseGroup() {
+		return phaseGroup;
 	}
 
 	/**

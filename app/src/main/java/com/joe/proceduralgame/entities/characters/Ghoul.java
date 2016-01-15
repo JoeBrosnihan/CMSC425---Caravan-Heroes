@@ -6,14 +6,14 @@ import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class Ghoul extends com.joe.proceduralgame.Character {
 	
-	private static final int N_COL = 8, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
+	private static final int N_COL = 8, GROUP = GROUP_ENEMY, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
 			TAKING_DAMAGE_ANIMATION_TIME = 800;
 
 	private int texture;
 	private int atlasIndex = 0;
 
 	public Ghoul() {
-		super(ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME);
+		super(GROUP, ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME);
 	}
 
 	@Override

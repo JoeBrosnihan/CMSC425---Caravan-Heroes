@@ -72,7 +72,7 @@ public class Controller {
 
 
 				} else { //manager.neutral == false
-					if (manager.phase != DungeonManager.PLAYER_PHASE)
+					if (manager.getPhaseGroup() != Character.GROUP_PLAYER)
 						return true;
 					if (targetQuad.type == Type.CHARACTER || targetQuad.type == Type.NONCHARACTER_ENTITY) {
 						if (selectedCharacter == null) {
