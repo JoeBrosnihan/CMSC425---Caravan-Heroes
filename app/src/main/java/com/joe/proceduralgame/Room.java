@@ -316,11 +316,16 @@ public class Room {
 		Comparator<int[]> squareComparator = new Comparator<int[]>() {
 			@Override
 			public int compare(int[] lhs, int[] rhs) {
-				int h_lhs = Math.abs(destRow - lhs[0]) + Math.abs(destCol - lhs[1]);
-				int h_rhs = Math.abs(destRow - rhs[0]) + Math.abs(destCol - rhs[1]);
-				int f_lhs = g[lhs[0]][lhs[1]] + h_lhs;
-				int f_rhs = g[rhs[0]][rhs[1]] + h_rhs;
-				return f_lhs - f_rhs;
+				double h_lhs = Math.hypot(destRow - lhs[0], destCol - lhs[1]);
+				double h_rhs = Math.hypot(destRow - rhs[0], destCol - rhs[1]);
+				double f_lhs = g[lhs[0]][lhs[1]] + h_lhs;
+				double f_rhs = g[rhs[0]][rhs[1]] + h_rhs;
+				if (f_lhs > f_rhs)
+					return 1;
+				else if (f_lhs < f_rhs)
+					return -1;
+				else return
+					0;
 			}
 		};
 
