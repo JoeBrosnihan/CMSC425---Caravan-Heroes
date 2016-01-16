@@ -26,6 +26,17 @@ public class Controller {
 		renderer.setFocus(character);
 	}
 
+	/**
+	 * Called by the DungeonManager when the room becomes tranquil.
+	 */
+	public void onBecomeTranquil() {
+		if (manager.getPhaseGroup() == Character.GROUP_PLAYER && selectedCharacter != null) {
+			if (!selectedCharacter.actedThisTurn) {
+				gui.showActionPane(selectedCharacter.getPossibleActions());
+			}
+		}
+	}
+
 	public boolean onTouchEvent(MotionEvent e) {
 		Room room = manager.currentRoom;
 		

@@ -29,25 +29,33 @@ public class GUIManager {
      * actions.
      * @param actions an array of Actions to display
      */
-    public void showActionPane(Action[] actions) {
-	    ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
-	    actionList.removeAllViews(); //clear children in case it
-	    LayoutInflater inflater = activity.getLayoutInflater();
-	    //TODO need to synchronize on the game thread if checking actions
-	        //or maybe I should design somehow else to avoid this complexity
-	    for (Action a : actions) {
-		    ViewGroup entry = (ViewGroup) inflater.inflate(R.layout.layout_action_entry, null);
-		    actionList.addView(entry);
-		    ((TextView) entry.findViewById(R.id.action_label)).setText(a.name);
-		    ((ImageView) entry.findViewById(R.id.action_icon)).setImageResource(R.drawable.attack_action_icon);
-	    }
+    public void showActionPane(final Action[] actions) {
+	    final ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
+
+	    actionList.getHandler().post(new Runnable() {
+		    @Override
+		    public void run() {
+			    actionList.removeAllViews(); //clear children in case it
+			    LayoutInflater inflater = activity.getLayoutInflater();
+			    //TODO need to synchronize on the game thread if checking actions
+			    //or maybe I should design somehow else to avoid this complexity
+			    for (Action a : actions) {
+				    ViewGroup entry = (ViewGroup) inflater.inflate(R.layout.layout_action_entry, null);
+				    actionList.addView(entry);
+				    ((TextView) entry.findViewById(R.id.action_label)).setText(a.name);
+				    ((ImageView) entry.findViewById(R.id.action_icon)).setImageResource(R.drawable.attack_action_icon);
+			    }
+		    }
+	    });
     }
 
 	/**
 	 * Hides the action pane.
 	 */
 	public void hideActionPane() {
-		((ViewGroup) activity.findViewById(R.id.action_list)).removeAllViews();
+		ViewGroup pane = (ViewGroup) activity.findViewById(R.id.action_list);
+		if (pane != null)
+			pane.removeAllViews();
 	}
 
 }

@@ -188,6 +188,7 @@ public class DungeonManager extends Thread {
 			assert actor.getGroupID() == phaseGroup;
 			assert !actor.actedThisTurn;
 		}
+		tranquil = false;
 		dungeonRenderer.setFocus(actor);
 		actor.enqueueAction(action, target);
 		actor.walkPath(path);
@@ -206,6 +207,7 @@ public class DungeonManager extends Thread {
 			assert actor.getGroupID() == phaseGroup;
 			assert !actor.actedThisTurn;
 		}
+		tranquil = false;
 		dungeonRenderer.setFocus(actor);
 		actor.clearAction();
 		actor.walkPath(path);
@@ -226,7 +228,7 @@ public class DungeonManager extends Thread {
 		else if (phaseGroup == Character.GROUP_ENEMY)
 			makeEnemyMove();
 
-		//do Controller callback
+		controller.onBecomeTranquil();
 	}
 
 	/**
