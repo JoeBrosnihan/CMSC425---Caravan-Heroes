@@ -13,6 +13,8 @@ public abstract class Character extends AttackableEntity {
 	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2,
 			STATE_TAKING_DAMAGE = 3;
 	public static final float TILT_ANGLE = 45f, VERTICAL_OFFSET = .25f, GROUND_LEVEL = .05f;
+
+	private static final Action[] DEFAULT_ACTIONS = {Action.basicAttack};
 	
 	protected float offsetX = 0, scaleX = 1, scaleY = 1;
 
@@ -44,6 +46,8 @@ public abstract class Character extends AttackableEntity {
 	private AttackableEntity attackTarget;
 	//An integer representing the group, or team, this unit is on
 	private int groupID;
+	//All the actions this Character can do, i.e. what shows up in the action pane by default
+	private Action[] possibleActions = DEFAULT_ACTIONS;
 
 	/**
 	 * Creates a new character with the given parameters
@@ -78,7 +82,14 @@ public abstract class Character extends AttackableEntity {
 		Matrix.translateM(quad.modelMatrix, 0, dir * offsetX, scaleY * .5f - GROUND_LEVEL, 0);
 		Matrix.scaleM(quad.modelMatrix, 0, dir * scaleX, scaleY, 1);
 	}
-	
+
+	/**
+	 * Moves this Character towards its intermediate destination.
+	 *
+	 * This method is called every frame only when this Character is in STATE_WALKING.
+	 *
+	 * @param dt the time passed since the previous frame in sec
+	 */
 	public void move(float dt) {
 		float dx = destx - posx;
 		float dy = destz - posz;
@@ -187,6 +198,10 @@ public abstract class Character extends AttackableEntity {
 			dir = 1;
 		setState(STATE_TAKING_DAMAGE);
 		currentRoom.addDamageDisplay(new DamageDisplay(damage, quad.textureUnit, posx, posz));
+	}
+
+	public Action[] getPossibleActions() {
+		return possibleActions;
 	}
 
 	/**

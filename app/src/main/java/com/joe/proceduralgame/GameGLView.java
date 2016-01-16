@@ -13,23 +13,24 @@ import android.view.MotionEvent;
 public class GameGLView extends GLSurfaceView {
 	
 	private final TextureManager textureManager;
+	private GUIManager guiManager;
 	private DungeonRenderer gameRenderer;
 	private DungeonManager dungeonManager;
 	private Controller gameController;
 	
-	public GameGLView(Context context) {
+	public GameGLView(Context context, GUIManager guiManager) {
 		super(context);
+		this.guiManager = guiManager;
 		setEGLContextClientVersion(2);
 		
 		textureManager = new TextureManager(context);
-		
 		dungeonManager = new DungeonManager(textureManager);
 		
 		gameRenderer = new DungeonRenderer(this, dungeonManager, textureManager);
 		dungeonManager.setDungeonRenderer(gameRenderer);
 		setRenderer(gameRenderer);
 
-		gameController = new Controller(this, gameRenderer, dungeonManager);
+		gameController = new Controller(this, gameRenderer, dungeonManager, guiManager);
 		gameRenderer.gameController = gameController;
 
 		dungeonManager.start();

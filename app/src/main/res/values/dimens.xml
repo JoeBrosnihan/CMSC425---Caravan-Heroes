@@ -4,5 +4,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="zero">0dp</dimen>
+    <dimen name="action_label_padding">7dp</dimen>
+    <dimen name="action_pane_width">100dp</dimen>
 
 </resources>

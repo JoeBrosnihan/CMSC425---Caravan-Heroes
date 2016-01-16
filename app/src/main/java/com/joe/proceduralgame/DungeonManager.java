@@ -10,6 +10,7 @@ public class DungeonManager extends Thread {
 
 	private DungeonRenderer dungeonRenderer;
 	private TextureManager textureManager;
+	private Controller controller;
 	
 	boolean running = false;
 	long waitMS = 10;
@@ -22,7 +23,10 @@ public class DungeonManager extends Thread {
 	 */
 	boolean neutral = false;
 	private int phaseGroup = Character.GROUP_PLAYER;
-
+	/** true if nothing is currently happening in the room, false if something is currently acting */
+	private boolean tranquil = true;
+	/** true if the phase will end as soon as the room becomes tranquil (tranquil == true). This
+	 * value is set when all characters in the current phaseGroup have acted. */
 	private boolean waitingToEndPhase = false;
 	/**
 	 * The last commanded player owned Character
@@ -96,12 +100,8 @@ public class DungeonManager extends Thread {
 			}
 		}
 
-		if (!neutral && allWaiting) {
-			if (waitingToEndPhase)
-				endPhase();
-			else if (phaseGroup == Character.GROUP_ENEMY)
-				makeEnemyMove();
-		}
+		if (!neutral && !tranquil && allWaiting)
+			becomeTranquil();
 	}
 
 	/**
@@ -214,6 +214,22 @@ public class DungeonManager extends Thread {
 	}
 
 	/**
+	 * Called when every action going on ends and every Character is in a waiting state.
+	 *
+	 * Triggers several events, including a the end of a turn if appropriate.
+	 */
+	private void becomeTranquil() {
+		tranquil = true;
+
+		if (waitingToEndPhase)
+			endPhase();
+		else if (phaseGroup == Character.GROUP_ENEMY)
+			makeEnemyMove();
+
+		//do Controller callback
+	}
+
+	/**
 	 * Marks a character as having acted this turn if not in neutral.
 	 *
 	 * @param character the Character that acted
@@ -252,6 +268,15 @@ public class DungeonManager extends Thread {
 	 */
 	public void setDungeonRenderer(DungeonRenderer renderer) {
 		this.dungeonRenderer = renderer;
+	}
+
+	/**
+	 * Sets the controller so this thread can check its information
+	 *
+	 * @param controller the controller
+	 */
+	public void setController(Controller controller) {
+		this.controller = controller;
 	}
 
 	public void run() {

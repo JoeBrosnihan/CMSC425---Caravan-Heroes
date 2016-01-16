@@ -7,6 +7,21 @@ package com.joe.proceduralgame;
  * merchant, pulling a lever, attacking an enemy, etc.
  */
 public abstract class Action {
+
+	public final String name;
+	public final int icon_id;
+
+	/**
+	 * Creates a new Action
+	 *
+	 * @param name the name to display for this Action
+	 * @param icon_id the resource id of the icon to display for this Action
+	 */
+	public Action(String name, int icon_id) {
+		this.name = name;
+		this.icon_id = icon_id;
+	}
+
     /**
      * Makes the actor perform this action on the object.
      *
@@ -40,7 +55,7 @@ public abstract class Action {
     /**
      * Used when any Character attacks an AttackableEntity.
      */
-    public static final Action basicAttack = new Action() {
+    public static final Action basicAttack = new Action("Attack", R.drawable.attack_action_icon) {
 
         @Override
         public void perform(Character actor, Entity object) {

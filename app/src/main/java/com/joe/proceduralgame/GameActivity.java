@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.ViewGroup;
 
 public class GameActivity extends Activity {
 	
@@ -12,9 +13,11 @@ public class GameActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        glView = new GameGLView(this);
-        setContentView(glView);
+
+	    setContentView(R.layout.activity_game);
+	    GUIManager guiManager = new GUIManager(this);
+        glView = new GameGLView(this, guiManager);
+	    ((ViewGroup) getWindow().getDecorView().getRootView()).addView(glView, 0);
     }
 
 

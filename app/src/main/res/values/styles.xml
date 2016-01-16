@@ -17,4 +17,10 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
+    <style name="action_label_style">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:padding">@dimen/action_label_padding</item>
+        <item name="android:width">@dimen/action_pane_width</item>
+    </style>
+
 </resources>

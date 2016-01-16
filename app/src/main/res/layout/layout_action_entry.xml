@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="@dimen/action_label_padding"
+              android:clickable="true">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:id="@+id/action_icon"
+            android:src="@drawable/attack_action_icon"/>
+
+        <TextView
+            style="@style/action_label_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/action_label"
+            android:textColor="#ffffff"
+            android:padding="@dimen/action_label_padding"/>
+
+</LinearLayout>
