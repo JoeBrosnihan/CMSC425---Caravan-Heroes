@@ -137,6 +137,8 @@ public class DungeonManager extends Thread {
 				}
 			}
 		}
+		//TODO temporariy become non-tranquil as a phase indicator is shown on the GUI
+		becomeTranquil(); //This will be triggered when the indicator is hidden
 	}
 
 	/**
@@ -178,8 +180,10 @@ public class DungeonManager extends Thread {
 	/**
 	 * Commands the actor to walk a path then perform an action on a target.
 	 *
+	 * path may be null. action may be null. target may be null.
+	 *
 	 * @param actor the Character that will perform the action
-	 * @param path LinkedList of length 2 int[]s {row, col} corresponding to squares to walk along
+	 * @param path LinkedList of {row, col} int[]s corresponding to grid squares to walk along
 	 * @param action the action the Character will perform after the path has been walked
 	 * @param target the target of the action
 	 */
@@ -190,8 +194,12 @@ public class DungeonManager extends Thread {
 		}
 		tranquil = false;
 		dungeonRenderer.setFocus(actor);
-		actor.enqueueAction(action, target);
-		actor.walkPath(path);
+		if (path != null) {
+			actor.enqueueAction(action, target);
+			actor.walkPath(path);
+		} else {
+			action.perform(actor, target);
+		}
 		if (actor.isPlayerOwned())
 			lastPlayerCommandedCharacter = actor;
 	}
@@ -279,6 +287,15 @@ public class DungeonManager extends Thread {
 	 */
 	public void setController(Controller controller) {
 		this.controller = controller;
+	}
+
+	/**
+	 * Checks if the current room is tranquil.
+	 *
+	 * @return true iff the room is tranquil.
+	 */
+	public boolean isTranquil() {
+		return tranquil;
 	}
 
 	public void run() {

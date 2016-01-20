@@ -31,6 +31,7 @@ public class GameGLView extends GLSurfaceView {
 		setRenderer(gameRenderer);
 
 		gameController = new Controller(this, gameRenderer, dungeonManager, guiManager);
+		guiManager.setController(gameController);
 		dungeonManager.setController(gameController);
 		gameRenderer.gameController = gameController;
 

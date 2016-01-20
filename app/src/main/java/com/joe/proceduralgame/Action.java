@@ -8,6 +8,8 @@ package com.joe.proceduralgame;
  */
 public abstract class Action {
 
+	public enum Visibility {SELECTABLE, NOT_SELECTABLE, HIDDEN};
+
 	public final String name;
 	public final int icon_id;
 
@@ -36,6 +38,15 @@ public abstract class Action {
      * were in range (i.e. does not check they are in range).
      */
     public abstract boolean canPerform(Character actor, Entity object);
+
+	/**
+	 * Returns the visibility of this action in the actor's action pane
+	 *
+	 * @param actor the selected chatacter
+	 * @param manager the active DungeonManager
+	 * @return the enum Visibility element describing how this action should be displayed
+	 */
+	public abstract Visibility getVisibility(Character actor, DungeonManager manager);
 
     /**
      * Holds an Action and the Entity target of the action.
@@ -74,6 +85,11 @@ public abstract class Action {
             else
                 return true;
         }
+
+	    @Override
+	    public Visibility getVisibility(Character actor, DungeonManager manager) {
+		    return Visibility.SELECTABLE;
+	    }
     };
 
 }

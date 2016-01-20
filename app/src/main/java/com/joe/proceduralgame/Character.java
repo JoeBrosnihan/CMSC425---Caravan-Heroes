@@ -156,7 +156,7 @@ public abstract class Character extends AttackableEntity {
 		setState(STATE_WAITING);
 		Action.Pair pair = dequeueAction();
 		if (pair != null) {
-			assert(pair.action.canPerform(this, pair.target));
+			assert(pair.action.canPerform(this, pair.target)); //TODO assertions don't do anything in Android
 			pair.action.perform(this, pair.target);
 		}
 	}
