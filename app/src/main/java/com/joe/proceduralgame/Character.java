@@ -1,6 +1,5 @@
 package com.joe.proceduralgame;
 
-import android.media.MediaPlayer;
 import android.opengl.Matrix;
 
 import java.util.LinkedList;
@@ -11,7 +10,7 @@ import java.util.LinkedList;
 public abstract class Character extends AttackableEntity {
 	public static final int GROUP_PLAYER = 0, GROUP_ENEMY = 1;
 	public static final int STATE_WAITING = 0, STATE_WALKING = 1, STATE_ATTACKING = 2,
-			STATE_TAKING_DAMAGE = 3;
+			STATE_TAKING_DAMAGE = 3, STATE_DEAD = 4;
 	public static final float TILT_ANGLE = 45f, VERTICAL_OFFSET = .25f, GROUND_LEVEL = .05f;
 
 	private static final Action[] DEFAULT_ACTIONS = {Action.basicAttack};
@@ -21,6 +20,7 @@ public abstract class Character extends AttackableEntity {
 	public final int attackHitTime;
 	public final int attackAnimationTime;
 	public final int takingDamageAnimationTime;
+	public final int deathAnimationTime;
 
 	public float destx, destz;
 	public int dir = 1;
@@ -48,6 +48,7 @@ public abstract class Character extends AttackableEntity {
 	private int groupID;
 	//All the actions this Character can do, i.e. what shows up in the action pane by default
 	private Action[] possibleActions = DEFAULT_ACTIONS;
+	private int strength, defense, hitPoints, maxHitPoints;
 
 	/**
 	 * Creates a new character with the given parameters
@@ -58,12 +59,16 @@ public abstract class Character extends AttackableEntity {
 	 * @param attackAnimationTime the length of the basic attack animation in ms
 	 * @param takingDamageAnimationTime the length of the taking damage animation in ms
 	 */
-	public Character(int groupID, int attackHitTime, int attackAnimationTime, int takingDamageAnimationTime) {
+	public Character(int groupID, int attackHitTime, int attackAnimationTime, int takingDamageAnimationTime,
+	                 int deathAnimationTime, int maxHitPoints) {
 		super();
 		this.groupID = groupID;
 		this.attackHitTime = attackHitTime;
 		this.attackAnimationTime = attackAnimationTime;
 		this.takingDamageAnimationTime = takingDamageAnimationTime;
+		this.deathAnimationTime = deathAnimationTime;
+		this.hitPoints = maxHitPoints;
+		this.maxHitPoints = maxHitPoints;
 	}
 	
 	@Override
@@ -190,14 +195,15 @@ public abstract class Character extends AttackableEntity {
 	}
 
 	@Override
-	public void takeHit(Character attacker, int damage) {
-		//TODO take damage
+	public void takeHit(Character attacker, int baseDamage) {
+		int effectiveDamage = baseDamage - defense;
+		takeDamage(effectiveDamage);
 		if (attacker.posx < posx)
 			dir = -1;
 		if (attacker.posx > posx)
 			dir = 1;
 		setState(STATE_TAKING_DAMAGE);
-		currentRoom.addDamageDisplay(new DamageDisplay(damage, quad.textureUnit, posx, posz));
+		currentRoom.addDamageDisplay(new DamageDisplay(effectiveDamage, quad.textureUnit, posx, posz));
 	}
 
 	public Action[] getPossibleActions() {
@@ -237,10 +243,61 @@ public abstract class Character extends AttackableEntity {
 	}
 
 	/**
+	 * Sets this Character's state to STATE_DEAD.
+	 * Called when the DungeonManager realizes this Character has zero hitpoints.
+	 */
+	public void die() {
+		setState(STATE_DEAD);
+	}
+
+	/**
 	 * Performs the Action on the target Entity when the Character reaches its destination
 	 */
 	public void enqueueAction(Action action, Entity target) {
 		queuedAction = new Action.Pair(action, target);
+	}
+
+	/**
+	 * Sets the strength of this Character
+	 */
+	public void setStrength(int strength) {
+		this.strength = strength;
+	}
+
+	/**
+	 * Gets the strength of this Character
+	 */
+	public int getStrength() {
+		return strength;
+	}
+
+	/**
+	 * Sets the defense of this Character
+	 * @param defense
+	 */
+	public void setDefense(int defense) {
+		this.defense = defense;
+	}
+
+	/**
+	 * Gets the defense of this Character
+	 */
+	public int getDefense() {
+		return defense;
+	}
+
+	/**
+	 * Gets the number of hit points this Character has remaining
+	 */
+	public int getHitPoints() {
+		return hitPoints;
+	}
+
+	/**
+	 * Gets the number of hit points this Character can have total
+	 */
+	public int getMaxHitPoints() {
+		return maxHitPoints;
 	}
 
 	/**
@@ -257,6 +314,14 @@ public abstract class Character extends AttackableEntity {
 		Action.Pair pair = queuedAction;
 		queuedAction = null;
 		return pair;
+	}
+
+	/**
+	 * Subtracts from this Character's health
+	 * @param damage the amount to subtract
+	 */
+	private void takeDamage(int damage) {
+		hitPoints = Math.max(0, hitPoints - damage);
 	}
 
 }

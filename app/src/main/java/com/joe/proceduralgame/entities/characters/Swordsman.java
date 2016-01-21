@@ -7,14 +7,20 @@ import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class Swordsman extends com.joe.proceduralgame.Character {
 
-	private static final int N_COL = 8, GROUP = GROUP_PLAYER, ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
-			TAKING_DAMAGE_ANIMATION_TIME = 800;
+	private static final int N_COL = 8;
+	private static final int GROUP = GROUP_PLAYER;
+	private static final int ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
+			TAKING_DAMAGE_ANIMATION_TIME = 800, DEATH_ANIMATION_TIME = 1000;
+	private static final int MAX_HITPOINTS = 7;
 
 	private int texture;
 	private int atlasIndex = 0;
 
 	public Swordsman() {
-		super(GROUP, ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME);
+		super(GROUP, ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME,
+				DEATH_ANIMATION_TIME, MAX_HITPOINTS);
+		setStrength(4);
+		setDefense(2);
 	}
 
 	@Override
@@ -69,6 +75,13 @@ public class Swordsman extends com.joe.proceduralgame.Character {
 			} else {
 				newIndex = 8;
 			}
+			break;
+		case STATE_DEAD:
+			animTime = System.currentTimeMillis() - stateStartTime;
+			if (animTime % 160 >= 120)
+				return;
+			else
+				newIndex = 9;
 			break;
 		}
 

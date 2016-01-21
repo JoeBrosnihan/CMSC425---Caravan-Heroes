@@ -122,7 +122,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    catchGLError();
 		
 		draw();
-	    catchGLError();
+	    catchGLError(); //TODO use these for testing, then clean up
 
 		lastDrawTime = time;
 	}

@@ -66,6 +66,9 @@ public class DungeonManager extends Thread {
 		long time = System.currentTimeMillis();
 		boolean allWaiting = true;
 		for (Character c : currentRoom.characters) {
+			if (c.state == Character.STATE_WAITING && c.getHitPoints() == 0)
+				c.die();
+
 			if (c.state != Character.STATE_WAITING)
 				allWaiting = false;
 
@@ -77,7 +80,7 @@ public class DungeonManager extends Thread {
 			} else if (c.state == Character.STATE_ATTACKING) {
 				if (!c.stateActionPerformed) {
 					if (time - c.stateStartTime >= c.attackHitTime) {
-						int damage = 666; //TODO calculate damage
+						int damage = c.getStrength(); //TODO calculate damage
 						AttackableEntity target = c.getAttackTarget();
 						target.takeHit(c, damage);
 						c.stateActionPerformed = true;

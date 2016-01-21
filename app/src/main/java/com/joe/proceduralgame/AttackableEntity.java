@@ -13,8 +13,8 @@ public abstract class AttackableEntity extends Entity {
      * Called when a Character attacks this entity
      *
      * @param attacker
-     * @param damage
+     * @param baseDamage
      */
-    public abstract void takeHit(Character attacker, int damage);
+    public abstract void takeHit(Character attacker, int baseDamage);
 
 }
