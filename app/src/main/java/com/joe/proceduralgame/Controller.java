@@ -159,7 +159,7 @@ public class Controller {
 	private Action.Visibility[] getActionVisibilities(Character actor, Action[] actions) {
 		Action.Visibility[] visibilities = new Action.Visibility[actions.length];
 		for (int i = 0; i < actions.length; i++) {
-			visibilities[i] = actions[i].getVisibility(actor, manager);
+			visibilities[i] = actions[i].getVisibility(actor);
 		}
 		return visibilities;
 	}

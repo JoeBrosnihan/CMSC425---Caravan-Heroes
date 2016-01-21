@@ -32,10 +32,7 @@ public abstract class Action {
     public abstract void perform(Character actor, Entity object);
 
     /**
-     * Returns true iff the actor is qualified to perform this action.
-     *
-     * That is, returns true if the actor could perform this action on this turn, assuming they
-     * were in range (i.e. does not check they are in range).
+     * That is, returns true if the actor can perform this action immediately.
      */
     public abstract boolean canPerform(Character actor, Entity object);
 
@@ -43,10 +40,9 @@ public abstract class Action {
 	 * Returns the visibility of this action in the actor's action pane
 	 *
 	 * @param actor the selected chatacter
-	 * @param manager the active DungeonManager
 	 * @return the enum Visibility element describing how this action should be displayed
 	 */
-	public abstract Visibility getVisibility(Character actor, DungeonManager manager);
+	public abstract Visibility getVisibility(Character actor);
 
     /**
      * Holds an Action and the Entity target of the action.
@@ -80,16 +76,39 @@ public abstract class Action {
          */
         @Override
         public boolean canPerform(Character actor, Entity object) {
-            if (object instanceof Character)
-                return actor.getGroupID() != ((Character) object).getGroupID();
-            else
-                return true;
+	        if (!(object instanceof AttackableEntity))
+		        return false;
+            if (object instanceof Character) {
+	            if (actor.getGroupID() != ((Character) object).getGroupID()) {
+					return inRange(actor, object);
+	            } else {
+		            return false;
+	            }
+            } else {
+	            return inRange(actor, object);
+            }
         }
 
 	    @Override
-	    public Visibility getVisibility(Character actor, DungeonManager manager) {
-		    return Visibility.SELECTABLE;
+	    public Visibility getVisibility(Character actor) {
+		    boolean possibleTarget = false;
+		    for (Entity e : actor.currentRoom.entities) {
+			    if (e instanceof AttackableEntity) {
+				    possibleTarget = true;
+				    if (canPerform(actor, e))
+					    return Visibility.SELECTABLE;
+			    }
+		    }
+		    if (possibleTarget)
+		        return Visibility.NOT_SELECTABLE;
+		    else
+			    return Visibility.HIDDEN;
 	    }
+
+	    private boolean inRange(Character actor, Entity object) {
+		    return Math.abs(actor.gridRow - object.gridRow) + Math.abs(actor.gridCol - object.gridCol) <= 1;
+	    }
+
     };
 
 }
