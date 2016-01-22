@@ -51,6 +51,19 @@ public class Room {
 		grid[fromRow][fromCol] = null;
 		grid[entity.gridRow][entity.gridCol] = entity;
 	}
+
+	/**
+	 * Removes an entity from this room.
+	 *
+	 * @param entity the entity to remove
+	 */
+	public void removeEntity(Entity entity) {
+		assert grid[entity.gridRow][entity.gridCol] == entity;
+		grid[entity.gridRow][entity.gridCol] = null;
+		entities.remove(entity);
+		if (entity instanceof Character)
+			characters.remove(entity);
+	}
 	
 	/**
 	 * Places entity on the grid, adds it to the room's entities, sets entity.currentRoom to this Room.

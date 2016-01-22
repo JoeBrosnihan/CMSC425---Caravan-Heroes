@@ -4,6 +4,7 @@ import com.joe.proceduralgame.entities.characters.Ghoul;
 import com.joe.proceduralgame.entities.characters.SkeletonWarrior;
 import com.joe.proceduralgame.entities.characters.Swordsman;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class DungeonManager extends Thread {
@@ -65,9 +66,9 @@ public class DungeonManager extends Thread {
 	public void update(float dt) { // TODO synchronize with touch events that affect the manager
 		long time = System.currentTimeMillis();
 		boolean allWaiting = true;
-		for (Character c : currentRoom.characters) {
-			if (c.state == Character.STATE_WAITING && c.getHitPoints() == 0)
-				c.die();
+		Iterator<Character> iterator = currentRoom.characters.iterator();
+		while (iterator.hasNext()) {
+			Character c = iterator.next();
 
 			if (c.state != Character.STATE_WAITING)
 				allWaiting = false;
@@ -75,12 +76,21 @@ public class DungeonManager extends Thread {
 			if (c.state == Character.STATE_WALKING) {
 				c.move(dt);
 			} else if (c.state == Character.STATE_TAKING_DAMAGE) {
-				if (time - c.stateStartTime >= c.takingDamageAnimationTime)
-					c.finishAction();
+				if (time - c.stateStartTime >= c.takingDamageAnimationTime) {
+					if (c.getHitPoints() == 0)
+						c.die();
+					else
+						c.finishAction();
+				}
+			} else if (c.state == Character.STATE_DEAD) {
+				if (time - c.stateStartTime >= c.deathAnimationTime) {
+					iterator.remove(); //remove here to avoid remove while iterating exception
+					currentRoom.removeEntity(c);
+				}
 			} else if (c.state == Character.STATE_ATTACKING) {
 				if (!c.stateActionPerformed) {
 					if (time - c.stateStartTime >= c.attackHitTime) {
-						int damage = c.getStrength(); //TODO calculate damage
+						int damage = c.getStrength();
 						AttackableEntity target = c.getAttackTarget();
 						target.takeHit(c, damage);
 						c.stateActionPerformed = true;

@@ -289,7 +289,7 @@ public abstract class Character extends AttackableEntity {
 	/**
 	 * Gets the number of hit points this Character has remaining
 	 */
-	public int getHitPoints() {
+	public final int getHitPoints() {
 		return hitPoints;
 	}
 
