@@ -28,6 +28,44 @@ public class GUIManager {
         this.activity = activity;
     }
 
+	/**
+	 * Inflates the overlay that shows the beginning of a phase
+	 *
+	 * @param group the group of the phase
+	 */
+	public void showPhaseOverlay(final int group) {
+		final ViewGroup root = ((ViewGroup) activity.getWindow().getDecorView().getRootView());
+		root.getHandler().post(new Runnable() {
+			@Override
+			public void run() {
+				View phaseOverlay = root.findViewById(R.id.phase_overlay);
+				if (phaseOverlay != null)
+					root.removeView(phaseOverlay);
+				phaseOverlay = activity.getLayoutInflater().inflate(R.layout.layout_phase, null);
+				root.addView(phaseOverlay);
+				if (group == Character.GROUP_PLAYER)
+					((ImageView) phaseOverlay).setImageResource(R.drawable.player_phase);
+				if (group == Character.GROUP_ENEMY)
+					((ImageView) phaseOverlay).setImageResource(R.drawable.enemy_phase);
+			}
+		});
+	}
+
+	/**
+	 * Hides the phase overlay
+	 */
+	public void hidePhaseOverlay() {
+		final ViewGroup root = ((ViewGroup) activity.getWindow().getDecorView().getRootView());
+		root.getHandler().post(new Runnable() {
+			@Override
+			public void run() {
+				View phaseOverlay = root.findViewById(R.id.phase_overlay);
+				if (phaseOverlay != null)
+					root.removeView(phaseOverlay);
+			}
+		});
+	}
+
     /**
      * (Re)Inflates the action pane and populates it with entries (icons and labels) for the given
      * actions.
@@ -74,9 +112,15 @@ public class GUIManager {
 	 * Hides the action pane.
 	 */
 	public void hideActionPane() {
-		ViewGroup pane = (ViewGroup) activity.findViewById(R.id.action_list);
-		if (pane != null)
-			pane.removeAllViews();
+		final ViewGroup pane = (ViewGroup) activity.findViewById(R.id.action_list);
+		if (pane != null) {
+			pane.getHandler().post(new Runnable() {
+				@Override
+				public void run() {
+					pane.removeAllViews();
+				}
+			});
+		}
 	}
 
 	/**

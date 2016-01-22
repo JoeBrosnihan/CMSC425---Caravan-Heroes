@@ -7,7 +7,6 @@ import java.io.InputStream;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.MotionEvent;
 
 public class GameGLView extends GLSurfaceView {
@@ -24,7 +23,8 @@ public class GameGLView extends GLSurfaceView {
 		setEGLContextClientVersion(2);
 		
 		textureManager = new TextureManager(context);
-		dungeonManager = new DungeonManager(textureManager);
+		dungeonManager = new DungeonManager();
+		dungeonManager.setGUIManager(guiManager);
 		
 		gameRenderer = new DungeonRenderer(this, dungeonManager, textureManager);
 		dungeonManager.setDungeonRenderer(gameRenderer);

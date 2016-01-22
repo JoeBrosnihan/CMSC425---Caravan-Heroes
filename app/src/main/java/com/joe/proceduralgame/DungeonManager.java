@@ -10,9 +10,11 @@ import java.util.LinkedList;
 
 public class DungeonManager extends Thread {
 
+	public static final int PHASE_TRANSITION_TIME = 800;
+
 	private DungeonRenderer dungeonRenderer;
-	private TextureManager textureManager;
 	private Controller controller;
+	private GUIManager guiManager;
 	
 	boolean running = false;
 	long waitMS = 10;
@@ -30,13 +32,16 @@ public class DungeonManager extends Thread {
 	/** true if the phase will end as soon as the room becomes tranquil (tranquil == true). This
 	 * value is set when all characters in the current phaseGroup have acted. */
 	private boolean waitingToEndPhase = false;
+	/** If true, show an overlay and don't update anything for an interval. */
+	private boolean transitioningPhase = false;
+	/** The time in ms of when the phase transition started */
+	private long transitionStartTime;
 	/**
 	 * The last commanded player owned Character
 	 */
 	private Character lastPlayerCommandedCharacter = null;
 
-	public DungeonManager(TextureManager manager) {
-		this.textureManager = manager;
+	public DungeonManager() {
 		this.setName("Dungeon Manager Thread");
 		initialize();
 	}
@@ -71,6 +76,16 @@ public class DungeonManager extends Thread {
 	
 	public void update(float dt) { // TODO synchronize with touch events that affect the manager
 		long time = System.currentTimeMillis();
+
+		if (transitioningPhase) {
+			if (time - transitionStartTime >= PHASE_TRANSITION_TIME) {
+				transitioningPhase = false;
+				guiManager.hidePhaseOverlay();
+				becomeTranquil();
+			}
+			return;
+		}
+
 		boolean allWaiting = true;
 		Iterator<Character> iterator = currentRoom.characters.iterator();
 		while (iterator.hasNext()) {
@@ -156,8 +171,11 @@ public class DungeonManager extends Thread {
 				}
 			}
 		}
-		//TODO temporariy become non-tranquil as a phase indicator is shown on the GUI
-		becomeTranquil(); //This will be triggered when the indicator is hidden
+		//temporariy become non-tranquil as a phase indicator is shown on the GUI
+		tranquil = false;
+		transitioningPhase = true;
+		transitionStartTime = System.currentTimeMillis();
+		guiManager.showPhaseOverlay(phaseGroup);
 	}
 
 	/**
@@ -176,7 +194,6 @@ public class DungeonManager extends Thread {
 		}
 		if (actor == null)
 			return;
-
 
 		Character target = null;
 		for (Character c : currentRoom.characters) {
@@ -306,6 +323,15 @@ public class DungeonManager extends Thread {
 	 */
 	public void setController(Controller controller) {
 		this.controller = controller;
+	}
+
+	/**
+	 * Sets the guiManager so this thread can display information
+	 *
+	 * @param guiManager the current guiManager
+	 */
+	public void setGUIManager(GUIManager guiManager) {
+		this.guiManager = guiManager;
 	}
 
 	/**
