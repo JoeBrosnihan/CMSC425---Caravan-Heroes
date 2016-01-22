@@ -1,5 +1,6 @@
 package com.joe.proceduralgame;
 
+import android.media.MediaPlayer;
 import android.opengl.Matrix;
 
 import java.util.LinkedList;
@@ -207,6 +208,8 @@ public abstract class Character extends AttackableEntity {
 	}
 
 	public Action[] getPossibleActions() {
+		if (actedThisTurn)
+			return new Action[0];
 		return possibleActions;
 	}
 

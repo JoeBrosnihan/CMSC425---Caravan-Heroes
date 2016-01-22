@@ -111,8 +111,6 @@ public class Controller {
 							}
 						}
 					} else { //selectedCharacter != null
-						if (selectedCharacter.actedThisTurn)
-							return true;
 						if (selectedAction == null) {
 							if (targetQuad.type == Type.FLOOR) {
 								int targetRow = (int) Math.round(targetQuad.getZ() - room.originz);
@@ -133,6 +131,8 @@ public class Controller {
 							}
 						} else { //selectedAction != null
 							if (targetQuad.type == Type.CHARACTER || targetQuad.type == Type.NONCHARACTER_ENTITY) {
+								if (selectedCharacter.actedThisTurn)
+									return true;
 								Entity targetEntity = RaycastUtils.quadToEntity(room, targetQuad);
 								if (selectedAction.canPerform(selectedCharacter, targetEntity)) {
 									manager.commandAction(selectedCharacter, null, selectedAction, targetEntity);

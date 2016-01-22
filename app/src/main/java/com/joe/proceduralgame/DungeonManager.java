@@ -1,5 +1,6 @@
 package com.joe.proceduralgame;
 
+import com.joe.proceduralgame.entities.characters.Archer;
 import com.joe.proceduralgame.entities.characters.Ghoul;
 import com.joe.proceduralgame.entities.characters.SkeletonWarrior;
 import com.joe.proceduralgame.entities.characters.Swordsman;
@@ -51,6 +52,11 @@ public class DungeonManager extends Thread {
 		
 		leader = new Swordsman();
 		currentRoom.addCharacter(leader);
+
+		final Character friend = new Archer();
+		friend.posx = 2;
+		friend.posz = 1;
+		currentRoom.addCharacter(friend);
 		
 		final Character enemy = new Ghoul();
 		enemy.posx = 2;
