@@ -45,7 +45,7 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 		case STATE_ATTACKING:
 			animTime = System.currentTimeMillis() - stateStartTime;
 			if (animTime < 200)
-				newIndex = 18;
+				newIndex = 26;
 			else if (animTime < 400)
 				newIndex = 28;
 			else
@@ -77,7 +77,7 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 				switch (newIndex) {
 				case 24:
 				case 25: // waiting/walking, standard
-				case 18: // attack, 1x1
+				case 26: // attack, 1x1
 					offsetX = 0;
 					scaleX = 1;
 					scaleY = 1;
