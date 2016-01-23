@@ -39,6 +39,8 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	
 	private Quad characterSelector;
 	private int uiTextureUnit;
+	/** Quads used to highlight squares a character can move to this turn. May be null */
+	private Quad[] moveOptionQuads = null;
 	
 	public static void catchGLError() {
 		int a1 = GLES20.GL_INVALID_ENUM;
@@ -73,6 +75,18 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
     		Matrix.rotateM(characterSelector.modelMatrix, 0, 90, 1, 0, 0);
     		characterSelector.draw(program, mVPMatrix);
     	}
+
+		//Highlight reachable squares
+		if (moveOptionQuads != null) {
+			int texturelessHandle = GLES20.glGetUniformLocation(program, "uTextureless");
+			GLES20.glUniform1i(texturelessHandle, 1); //draw all quads blank white
+
+			for (Quad q : moveOptionQuads) {
+				q.drawWithoutTexture(program, mVPMatrix);
+			}
+
+			GLES20.glUniform1i(texturelessHandle, 0); //draw all quads blank white
+		}
     	
 	    GLES20.glDisable(GLES20.GL_CULL_FACE);
 		//TODO do these need to be synchronized as well? What if something gets added from game thread?
@@ -125,6 +139,25 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    catchGLError(); //TODO use these for testing, then clean up
 
 		lastDrawTime = time;
+	}
+
+	/**
+	 * Highlights squares to indicate where a character can move
+	 *
+	 * @param squares an array of {row, col} int[]s of all the squares to highlight
+	 */
+	public void showMoveOptions(int[][] squares) {
+		moveOptionQuads = new Quad[squares.length];
+		for (int i = 0; i < squares.length; i++) {
+			float[] modelMatrix = new float[16];
+			float posx = dungeonManager.currentRoom.originx + squares[i][1];
+			float posz = dungeonManager.currentRoom.originz + squares[i][0];
+			Matrix.setIdentityM(modelMatrix, 0);
+			Matrix.translateM(modelMatrix, 0, posx, .05f, posz);
+			Matrix.rotateM(modelMatrix, 0, 90, 1, 0, 0);
+			Quad quad = Quad.createDynamicQuad(Type.DECORATION, modelMatrix, 0);
+			moveOptionQuads[i] = quad;
+		}
 	}
 
 	/**
@@ -208,6 +241,9 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    catchGLError();
 		GLES20.glLinkProgram(program);
 	    catchGLError();
+
+		int texturelessHandle = GLES20.glGetUniformLocation(program, "uTextureless");
+		GLES20.glUniform1i(texturelessHandle, 0); //draw all quads with textures by default
 		
 		GLES20.glClearColor(0, 0, 0, 1);
 	    catchGLError();

@@ -4,6 +4,7 @@ precision mediump float;
 uniform sampler2D uTexture;
 uniform vec2 uvOrigin;
 uniform vec2 uvScale;
+uniform bool uTextureless;
 
 uniform vec3 ambient;
 #define maxLights 1
@@ -29,7 +30,11 @@ void main() {
 			totalLight = totalLight - ndot * vec3(1, .9f, .8f);
 		}
 	}
-	vec4 sample = texture2D(uTexture, uvOrigin + uv * uvScale);
+    vec4 sample;
+    if (uTextureless)
+        sample = vec4(1.f, 1.f, 1.f, 1.f);
+	else
+        sample = texture2D(uTexture, uvOrigin + uv * uvScale);
 	if (sample.w < .1)
 		discard;
 	gl_FragColor = vec4(totalLight * sample.xyz, sample.w);

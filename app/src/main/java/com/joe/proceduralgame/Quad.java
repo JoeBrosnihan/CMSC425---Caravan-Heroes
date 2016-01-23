@@ -96,34 +96,65 @@ public class Quad {
 
 		int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "vPosition");
 		int texCoordsHandle = GLES20.glGetAttribLocation(shaderProgram, "vTexCoords");
-		
+
 		vertexBuffer.position(mPositionOffset);
 		GLES20.glVertexAttribPointer(positionHandle, mPositionDataSize, GLES20.GL_FLOAT, false, mStrideBytes, vertexBuffer);
 		GLES20.glEnableVertexAttribArray(positionHandle);
-		
+
 		vertexBuffer.position(mTexCoordsOffset);
 		GLES20.glVertexAttribPointer(texCoordsHandle, mTexCoordsDataSize, GLES20.GL_FLOAT, false, mStrideBytes, vertexBuffer);
 		GLES20.glEnableVertexAttribArray(texCoordsHandle);
-		
+
 		int mvpHandle = GLES20.glGetUniformLocation(shaderProgram, "MVP");
 		GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvp, 0);
-		
+
 //		int modelHandle = GLES20.glGetUniformLocation(shaderProgram, "modelMatrix");
 //		GLES20.glUniformMatrix4fv(modelHandle, 1, false, modelMatrix, 0);
 
 		int textureHandle = GLES20.glGetUniformLocation(shaderProgram, "uTexture");
 		GLES20.glUniform1i(textureHandle, textureUnit);
-		
+
 		int uvOriginHandle = GLES20.glGetUniformLocation(shaderProgram, "uvOrigin");
 		int uvScaleHandle = GLES20.glGetUniformLocation(shaderProgram, "uvScale");
 		GLES20.glUniform2f(uvOriginHandle, uvOrigin[0], uvOrigin[1]);
 		GLES20.glUniform2f(uvScaleHandle, uvScale[0], uvScale[1]);
 
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
-		
+
 		GLES20.glDisableVertexAttribArray(positionHandle);
 		GLES20.glDisableVertexAttribArray(texCoordsHandle);
-		
+
+	}
+
+	/**
+	 * Stripped version of draw() that doesn't set any texture related GL uniforms
+	 *
+	 * @param shaderProgram
+	 * @param mVPMatrix
+	 */
+	public void drawWithoutTexture(int shaderProgram, float[] mVPMatrix) {
+		float[] mvp = new float[16];
+		Matrix.multiplyMM(mvp, 0, mVPMatrix, 0, modelMatrix, 0);
+
+		int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "vPosition");
+		int texCoordsHandle = GLES20.glGetAttribLocation(shaderProgram, "vTexCoords");
+
+		vertexBuffer.position(mPositionOffset);
+		GLES20.glVertexAttribPointer(positionHandle, mPositionDataSize, GLES20.GL_FLOAT, false, mStrideBytes, vertexBuffer);
+		GLES20.glEnableVertexAttribArray(positionHandle);
+
+		vertexBuffer.position(mTexCoordsOffset);
+		GLES20.glVertexAttribPointer(texCoordsHandle, mTexCoordsDataSize, GLES20.GL_FLOAT, false, mStrideBytes, vertexBuffer);
+		GLES20.glEnableVertexAttribArray(texCoordsHandle);
+
+		int mvpHandle = GLES20.glGetUniformLocation(shaderProgram, "MVP");
+		GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvp, 0);
+
+		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
+
+		GLES20.glDisableVertexAttribArray(positionHandle);
+		GLES20.glDisableVertexAttribArray(texCoordsHandle);
+
 	}
 
 	public void destroy() {

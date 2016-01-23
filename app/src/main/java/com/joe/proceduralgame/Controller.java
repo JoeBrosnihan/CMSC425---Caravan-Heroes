@@ -25,6 +25,9 @@ public class Controller {
 	private void selectCharacter(Character character) {
 		selectedCharacter = character;
 		renderer.setFocus(character);
+		int movesLeft = character.getMoveDistance() - character.getSquaresTraversed();
+		int[][] moveOptions = manager.currentRoom.getRange(character.gridRow, character.gridCol, movesLeft);
+		renderer.showMoveOptions(moveOptions);
 	}
 
 	/**

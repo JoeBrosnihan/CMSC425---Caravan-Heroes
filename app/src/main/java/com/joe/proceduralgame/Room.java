@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -390,6 +391,70 @@ public class Room {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Gets all squares reachable within range # of hops from a start square
+	 *
+	 * @param startRow the row of the start square
+	 * @param startCol the column of the start square
+	 * @param range the maximum length of a path from the start square
+	 * @return an array of {row, col} int[]s representing all reachable squares
+	 */
+	public int[][] getRange(int startRow, int startCol, int range) {
+		boolean[][] discovered = new boolean[length][width]; //initialized to false
+		boolean[][] reachable = new boolean[length][width]; //initialized to false
+		final int[][] g = new int[length][width]; //initialized to zero
+		int nReachable = 0;
+
+		Queue<int[]> frontier = new LinkedList<int[]>();
+
+		int[] curSquare = new int[2];
+		curSquare[0] = startRow;
+		curSquare[1] = startCol;
+		frontier.add(curSquare);
+
+		Outer:
+		while ((curSquare = frontier.poll()) != null) {
+			reachable[curSquare[0]][curSquare[1]] = true;
+			nReachable++;
+			if (g[curSquare[0]][curSquare[1]] == range)
+				continue;
+			for (int i = 0; i < 4; i++) {
+				double theta = Math.PI * .5 * i;
+				int adjRow = (int) Math.round(curSquare[0] - Math.sin(theta));
+				int adjCol = (int) Math.round(curSquare[1] + Math.cos(theta));
+				if (adjRow < 0 || adjRow >= length || adjCol < 0 || adjCol >= width) //check in bounds
+					continue;
+				if (!discovered[adjRow][adjCol]) { //if not discovered
+					discovered[adjRow][adjCol] = true;
+					if (grid[adjRow][adjCol] != null)
+						continue;
+
+					//cost so far
+					g[adjRow][adjCol] = g[curSquare[0]][curSquare[1]] + 1;
+
+					int[] adjSquare = new int[2];
+					adjSquare[0] = adjRow;
+					adjSquare[1] = adjCol;
+					frontier.add(adjSquare);
+				}
+			}
+		}
+
+		int[][] options = new int [nReachable][2];
+		int index = 0;
+		for (int row = 0; row < length; row++) {
+			for (int col = 0; col < width; col++) {
+				if (reachable[row][col]) {
+					options[index][0] = row;
+					options[index][1] = col;
+					index++;
+				}
+			}
+		}
+
+		return options;
 	}
 
 }
