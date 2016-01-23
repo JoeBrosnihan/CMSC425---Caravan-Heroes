@@ -47,6 +47,7 @@ public class Controller {
 			return;
 		manager.commandMove(selectedCharacter, path);
 		gui.hideActionPane();
+		renderer.hideMoveOptions();
 	}
 
 	/**
@@ -57,6 +58,9 @@ public class Controller {
 			selectedCharacter = null;
 		} else if (manager.getPhaseGroup() == Character.GROUP_PLAYER && selectedCharacter != null) {
 			if (!selectedCharacter.actedThisTurn) {
+				int movesLeft = selectedCharacter.getMoveDistance() - selectedCharacter.getSquaresTraversed();
+				int[][] moveOptions = manager.currentRoom.getRange(selectedCharacter.gridRow, selectedCharacter.gridCol, movesLeft);
+				renderer.showMoveOptions(moveOptions);
 				Action[] actions = selectedCharacter.getPossibleActions();
 				gui.showActionPane(actions, getActionVisibilities(selectedCharacter, actions));
 			}

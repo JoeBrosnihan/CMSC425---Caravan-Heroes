@@ -161,6 +161,13 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	}
 
 	/**
+	 * Stops highlighting squares indicating where a character can move
+	 */
+	public void hideMoveOptions() {
+		moveOptionQuads = null;
+	}
+
+	/**
 	 * Adjusts the camera's position
 	 *
 	 * @param dt time elapsed since last frame in seconds
