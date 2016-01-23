@@ -159,6 +159,7 @@ public class Controller {
 									manager.commandAction(selectedCharacter, null, selectedAction, targetEntity);
 									selectedAction = null;
 									gui.hideActionPane();
+									renderer.hideMoveOptions();
 								}
 							}
 						}
