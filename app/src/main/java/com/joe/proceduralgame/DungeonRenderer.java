@@ -61,6 +61,11 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	
 	public void draw() {
 	    GLES20.glUseProgram(program);
+
+		int texturelessHandle = GLES20.glGetUniformLocation(program, "uTextureless");
+		GLES20.glUniform1i(texturelessHandle, 0); //draw all quads with textures by default
+		int colorMultiplierHandle = GLES20.glGetUniformLocation(program, "uColorMultiplier");
+		GLES20.glUniform4f(colorMultiplierHandle, 1, 1, 1, 1); //draw all quads with textures by default
 	    
 	    GLES20.glEnable(GLES20.GL_CULL_FACE);
 	    dungeonManager.currentRoom.draw(program, mVPMatrix, vertexBuffer);
@@ -78,14 +83,13 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 
 		//Highlight reachable squares
 		if (moveOptionQuads != null) {
-			int texturelessHandle = GLES20.glGetUniformLocation(program, "uTextureless");
 			GLES20.glUniform1i(texturelessHandle, 1); //draw all quads blank white
-
+			GLES20.glUniform4f(colorMultiplierHandle, 81 / 255.f, 145 / 255.f, 255 / 255.f, .5f);
 			for (Quad q : moveOptionQuads) {
 				q.drawWithoutTexture(program, mVPMatrix);
 			}
-
-			GLES20.glUniform1i(texturelessHandle, 0); //draw all quads blank white
+			GLES20.glUniform1i(texturelessHandle, 0);
+			GLES20.glUniform4f(colorMultiplierHandle, 1, 1, 1, 1);
 		}
     	
 	    GLES20.glDisable(GLES20.GL_CULL_FACE);
@@ -249,9 +253,6 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		GLES20.glLinkProgram(program);
 	    catchGLError();
 
-		int texturelessHandle = GLES20.glGetUniformLocation(program, "uTextureless");
-		GLES20.glUniform1i(texturelessHandle, 0); //draw all quads with textures by default
-		
 		GLES20.glClearColor(0, 0, 0, 1);
 	    catchGLError();
 		
