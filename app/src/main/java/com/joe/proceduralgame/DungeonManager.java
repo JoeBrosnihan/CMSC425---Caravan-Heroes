@@ -144,7 +144,7 @@ public class DungeonManager extends Thread {
 	public void endPhase() {
 		waitingToEndPhase = false;
 		for (Character c : currentRoom.characters) {
-			c.actedThisTurn = false;
+			c.phaseReset();
 		}
 		if (phaseGroup == Character.GROUP_PLAYER)
 			beginPhase(Character.GROUP_ENEMY);
@@ -250,6 +250,7 @@ public class DungeonManager extends Thread {
 		if (!neutral) {
 			assert actor.getGroupID() == phaseGroup;
 			assert !actor.actedThisTurn;
+			assert path.size() <= actor.getMoveDistance() - actor.getSquaresTraversed();
 		}
 		tranquil = false;
 		dungeonRenderer.setFocus(actor);

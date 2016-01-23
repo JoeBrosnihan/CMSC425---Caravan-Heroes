@@ -309,7 +309,8 @@ public class Room {
 	/**
 	 * Finds a shortest path in this room between two squares that avoids squares with Entities.
 	 *
-	 * If start = end, returns a path with one square, the starting square.
+	 * Excludes the starting square, includes the destination square. Returns a list of length 0 if
+	 * the start square is the end square.
 	 *
 	 * @param startRow
 	 * @param startCol
@@ -381,7 +382,7 @@ public class Room {
 
 		if (curSquare != null) { //success, reconstruct path
 			LinkedList<int[]> path = new LinkedList<int[]>();
-			while (curSquare != null) {
+			while (curSquare != null && !(curSquare[0] == startRow && curSquare[1] == startCol)) {
 				path.addFirst(curSquare);
 				curSquare = prev[curSquare[0]][curSquare[1]];
 			}

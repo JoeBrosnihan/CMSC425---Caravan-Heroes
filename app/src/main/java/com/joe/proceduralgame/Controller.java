@@ -28,6 +28,25 @@ public class Controller {
 	}
 
 	/**
+	 * Called when the user tries to move the selectedCharacter to a square
+	 *
+	 * @param targetRow the row of the square
+	 * @param targetCol the col of the square
+	 */
+	private void moveToSquare(int targetRow, int targetCol) {
+		Room room = manager.currentRoom;
+		LinkedList<int[]> path = room.findPath(selectedCharacter.gridRow,
+				selectedCharacter.gridCol, targetRow, targetCol, true);
+		if (path == null)
+			return;
+		int moveSquaresLeft = selectedCharacter.getMoveDistance() - selectedCharacter.getSquaresTraversed();
+		if (path.size() > moveSquaresLeft)
+			return;
+		manager.commandMove(selectedCharacter, path);
+		gui.hideActionPane();
+	}
+
+	/**
 	 * Called by the DungeonManager when the room becomes tranquil.
 	 */
 	public void onBecomeTranquil() {
@@ -113,14 +132,9 @@ public class Controller {
 					} else { //selectedCharacter != null
 						if (selectedAction == null) {
 							if (targetQuad.type == Type.FLOOR) {
-								int targetRow = (int) Math.round(targetQuad.getZ() - room.originz);
-								int targetCol = (int) Math.round(targetQuad.getX() - room.originx);
-								LinkedList<int[]> path = room.findPath(selectedCharacter.gridRow,
-										selectedCharacter.gridCol, targetRow, targetCol, true);
-								if (path != null) {
-									manager.commandMove(selectedCharacter, path);
-									gui.hideActionPane();
-								}
+								int targetRow = Math.round(targetQuad.getZ() - room.originz);
+								int targetCol = Math.round(targetQuad.getX() - room.originx);
+								moveToSquare(targetRow, targetCol);
 							} else if (targetQuad.type == Type.CHARACTER) {
 								Character character = RaycastUtils.quadToCharacter(room, targetQuad);
 								if (character.isPlayerOwned()) {

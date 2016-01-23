@@ -49,7 +49,9 @@ public abstract class Character extends AttackableEntity {
 	private int groupID;
 	//All the actions this Character can do, i.e. what shows up in the action pane by default
 	private Action[] possibleActions = DEFAULT_ACTIONS;
-	private int strength, defense, hitPoints, maxHitPoints;
+	private int strength, defense, hitPoints, maxHitPoints, moveDistance;
+	/** The number of squares traversed this turn */
+	private int squaresTraversed = 0;
 
 	/**
 	 * Creates a new character with the given parameters
@@ -61,7 +63,7 @@ public abstract class Character extends AttackableEntity {
 	 * @param takingDamageAnimationTime the length of the taking damage animation in ms
 	 */
 	public Character(int groupID, int attackHitTime, int attackAnimationTime, int takingDamageAnimationTime,
-	                 int deathAnimationTime, int maxHitPoints) {
+	                 int deathAnimationTime, int maxHitPoints, int moveDistance) {
 		super();
 		this.groupID = groupID;
 		this.attackHitTime = attackHitTime;
@@ -70,6 +72,7 @@ public abstract class Character extends AttackableEntity {
 		this.deathAnimationTime = deathAnimationTime;
 		this.hitPoints = maxHitPoints;
 		this.maxHitPoints = maxHitPoints;
+		this.moveDistance = moveDistance;
 	}
 	
 	@Override
@@ -146,6 +149,7 @@ public abstract class Character extends AttackableEntity {
 	 * square itself.
 	 */
 	public void reachedDest() { // linear walk dest, not necessarily path dest.
+		squaresTraversed++;
 		if (currentPath != null && !currentPath.isEmpty()) { //TODO at some point in development, currentPath should always be nonnull
 			int[] dest = currentPath.removeFirst();
 			walkTo(currentRoom.originx + dest[1], currentRoom.originz + dest[0]);
@@ -246,6 +250,14 @@ public abstract class Character extends AttackableEntity {
 	}
 
 	/**
+	 * Resets this Character's per phase state for the beginning of a new phase.
+	 */
+	public void phaseReset() {
+		actedThisTurn = false;
+		squaresTraversed = 0;
+	}
+
+	/**
 	 * Sets this Character's state to STATE_DEAD.
 	 * Called when the DungeonManager realizes this Character has zero hitpoints.
 	 */
@@ -301,6 +313,20 @@ public abstract class Character extends AttackableEntity {
 	 */
 	public int getMaxHitPoints() {
 		return maxHitPoints;
+	}
+
+	/**
+	 * Gets the number of squares this Character can traverse total in a turn
+	 */
+	public final int getMoveDistance() {
+		return moveDistance;
+	}
+
+	/**
+	 * Gets the number of squares this Character has traversed this turn
+	 */
+	public final int getSquaresTraversed() {
+		return squaresTraversed;
 	}
 
 	/**

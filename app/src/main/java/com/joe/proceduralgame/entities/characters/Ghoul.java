@@ -10,14 +10,14 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 	private static final int GROUP = GROUP_ENEMY;
 	private static final int ATTACK_HIT_TIME = 400, ATTACK_ANIMATION_TIME = 500,
 			TAKING_DAMAGE_ANIMATION_TIME = 800, DEATH_ANIMATION_TIME = 1000;
-	private static final int MAX_HITPOINTS = 4;
+	private static final int MAX_HITPOINTS = 4, MOVE_DISTANCE = 5;
 
 	private int texture;
 	private int atlasIndex = 0;
 
 	public Ghoul() {
 		super(GROUP, ATTACK_HIT_TIME, ATTACK_ANIMATION_TIME, TAKING_DAMAGE_ANIMATION_TIME,
-				DEATH_ANIMATION_TIME, MAX_HITPOINTS);
+				DEATH_ANIMATION_TIME, MAX_HITPOINTS, MOVE_DISTANCE);
 		setStrength(3);
 		setDefense(1);
 	}
