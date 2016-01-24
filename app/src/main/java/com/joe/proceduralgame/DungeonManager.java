@@ -2,6 +2,7 @@ package com.joe.proceduralgame;
 
 import com.joe.proceduralgame.entities.characters.Archer;
 import com.joe.proceduralgame.entities.characters.Ghoul;
+import com.joe.proceduralgame.entities.characters.Serpul;
 import com.joe.proceduralgame.entities.characters.SkeletonWarrior;
 import com.joe.proceduralgame.entities.characters.Swordsman;
 
@@ -72,6 +73,11 @@ public class DungeonManager extends Thread {
 		enemy2.posx = 3;
 		enemy2.posz = 2;
 		currentRoom.addCharacter(enemy2);
+
+		final Character enemy3 = new Serpul();
+		enemy3.posx = 1;
+		enemy3.posz = 2;
+		currentRoom.addCharacter(enemy3);
 	}
 	
 	public void update(float dt) { // TODO synchronize with touch events that affect the manager
