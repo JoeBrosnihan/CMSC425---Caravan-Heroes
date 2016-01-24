@@ -15,8 +15,71 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:orientation="vertical"
-                  android:background="#c735417b"
-                  android:id="@+id/action_list"/>
+                  android:id="@+id/action_list"
+                  style="@style/gui_pane"/>
+
+    <LinearLayout
+        style="@style/gui_pane"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout"
+        android:layout_alignParentRight="true"
+        android:padding="5dp">
+
+        <FrameLayout
+            android:layout_width="@dimen/character_icon_size"
+            android:layout_height="@dimen/character_icon_size">
+
+            <ImageView
+                android:layout_width="@dimen/character_icon_size"
+                android:layout_height="@dimen/character_icon_size"
+                android:id="@+id/imageView2"
+                android:src="@drawable/icon_green"/>
+
+            <ImageView
+                android:layout_width="@dimen/character_icon_size"
+                android:layout_height="@dimen/character_icon_size"
+                android:id="@+id/imageView"
+                android:src="@drawable/swordsman_icon"/>
+        </FrameLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="5 / 7"
+                android:id="@+id/textView"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="@dimen/health_bar_width"
+                android:layout_height="@dimen/health_bar_height"
+                android:id="@+id/health_bar"
+                android:background="#ba0000">
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="#0fb700"/>
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 
 </RelativeLayout>

@@ -6,5 +6,8 @@
     <dimen name="zero">0dp</dimen>
     <dimen name="action_label_padding">7dp</dimen>
     <dimen name="action_pane_width">100dp</dimen>
+    <dimen name="character_icon_size">50dp</dimen>
+    <dimen name="health_bar_width">160dp</dimen>
+    <dimen name="health_bar_height">5dp</dimen>
 
 </resources>
