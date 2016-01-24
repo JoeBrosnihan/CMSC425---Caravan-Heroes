@@ -104,6 +104,10 @@ public abstract class Action {
 		    boolean possibleTarget = false;
 		    for (Entity e : actor.currentRoom.entities) {
 			    if (e instanceof AttackableEntity) {
+				    if (e instanceof Character) {
+					    if (((Character) e).getGroupID() == actor.getGroupID())
+						    continue;
+				    }
 				    possibleTarget = true;
 				    if (canPerform(actor, e))
 					    return Visibility.SELECTABLE;
