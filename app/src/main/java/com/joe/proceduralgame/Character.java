@@ -122,6 +122,11 @@ public abstract class Character extends AttackableEntity {
 			attackSound.start();
 	}
 
+	/**
+	 * Makes this character begin walking a path
+	 *
+	 * @param path a LinkedList of size > 0, consiting of {row, col} int[]s of squares
+	 */
 	public void walkPath(LinkedList<int[]> path) {
 		currentPath = path;
 		int[] dest = path.removeFirst();

@@ -236,7 +236,7 @@ public class DungeonManager extends Thread {
 		}
 		tranquil = false;
 		dungeonRenderer.setFocus(actor);
-		if (path != null) {
+		if (path != null && path.size() > 0) {
 			actor.enqueueAction(action, target);
 			actor.walkPath(path);
 		} else {
