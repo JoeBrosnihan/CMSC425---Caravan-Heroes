@@ -66,6 +66,16 @@ public abstract class Action {
 
         @Override
         public void perform(Character actor, Entity object) {
+	        if (object.posx > actor.posx) {
+		        actor.dir = 1;
+		        if (object instanceof Character)
+			        ((Character) object).dir = -1;
+	        }
+	        if (object.posx < actor.posx) {
+		        actor.dir = -1;
+		        if (object instanceof Character)
+			        ((Character) object).dir = 1;
+	        }
             actor.attack((AttackableEntity) object);
         }
 

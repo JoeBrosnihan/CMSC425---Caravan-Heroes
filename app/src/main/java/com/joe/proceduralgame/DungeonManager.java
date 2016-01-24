@@ -74,9 +74,14 @@ public class DungeonManager extends Thread {
 		enemy2.posz = 2;
 		currentRoom.addCharacter(enemy2);
 
-		final Character enemy3 = new Serpul();
+		Character enemy3 = new Serpul();
 		enemy3.posx = 1;
 		enemy3.posz = 2;
+		currentRoom.addCharacter(enemy3);
+
+		enemy3 = new Serpul();
+		enemy3.posx = 1;
+		enemy3.posz = 3;
 		currentRoom.addCharacter(enemy3);
 	}
 	

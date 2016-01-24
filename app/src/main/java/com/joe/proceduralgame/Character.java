@@ -208,10 +208,6 @@ public abstract class Character extends AttackableEntity {
 	public void takeHit(Character attacker, int baseDamage) {
 		int effectiveDamage = baseDamage - defense;
 		takeDamage(effectiveDamage);
-		if (attacker.posx < posx)
-			dir = -1;
-		if (attacker.posx > posx)
-			dir = 1;
 		setState(STATE_TAKING_DAMAGE);
 		currentRoom.addDamageDisplay(new DamageDisplay(effectiveDamage, quad.textureUnit, posx, posz));
 	}
