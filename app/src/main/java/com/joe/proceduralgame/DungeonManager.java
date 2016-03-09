@@ -11,7 +11,7 @@ import java.util.LinkedList;
 
 public class DungeonManager extends Thread {
 
-	public static final int PHASE_TRANSITION_TIME = 800;
+	public static final int PHASE_TRANSITION_TIME = 1500;
 
 	private DungeonRenderer dungeonRenderer;
 	private Controller controller;

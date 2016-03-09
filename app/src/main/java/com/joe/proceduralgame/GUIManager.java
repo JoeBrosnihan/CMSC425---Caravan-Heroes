@@ -6,6 +6,8 @@ import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -38,15 +40,15 @@ public class GUIManager {
 		root.getHandler().post(new Runnable() {
 			@Override
 			public void run() {
-				View phaseOverlay = root.findViewById(R.id.phase_overlay);
-				if (phaseOverlay != null)
-					root.removeView(phaseOverlay);
-				phaseOverlay = activity.getLayoutInflater().inflate(R.layout.layout_phase, null);
-				root.addView(phaseOverlay);
+				ImageView phaseOverlay = (ImageView) root.findViewById(R.id.phase_overlay);
 				if (group == Character.GROUP_PLAYER)
-					((ImageView) phaseOverlay).setImageResource(R.drawable.player_phase);
+					phaseOverlay.setImageResource(R.drawable.player_phase);
 				if (group == Character.GROUP_ENEMY)
-					((ImageView) phaseOverlay).setImageResource(R.drawable.enemy_phase);
+					phaseOverlay.setImageResource(R.drawable.enemy_phase);
+				phaseOverlay.setVisibility(View.VISIBLE);
+
+				Animation phaseAnimation = AnimationUtils.loadAnimation(activity, R.anim.phase_transition);
+				phaseOverlay.startAnimation(phaseAnimation);
 			}
 		});
 	}
@@ -60,8 +62,7 @@ public class GUIManager {
 			@Override
 			public void run() {
 				View phaseOverlay = root.findViewById(R.id.phase_overlay);
-				if (phaseOverlay != null)
-					root.removeView(phaseOverlay);
+				phaseOverlay.setVisibility(View.INVISIBLE);
 			}
 		});
 	}

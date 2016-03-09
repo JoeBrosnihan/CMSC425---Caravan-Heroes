@@ -81,5 +81,18 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:id="@+id/phase_overlay"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/player_phase"
+        android:layout_weight="1"
+        android:adjustViewBounds="false"
+        android:scaleType="fitCenter"
+        android:layout_gravity="center_horizontal"
+        android:visibility="invisible"/>
+
 
 </RelativeLayout>
