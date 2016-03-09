@@ -29,7 +29,40 @@ public class RaycastUtils {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Projects a ray onto the plane with altitude 0 and returns the intersection point
+	 *
+	 * @param result the array in which the result is stored
+	 * @param viewMatrix the view matrix of the camera
+	 * @param nearX the x intersection of the ray with the plane z = -1 in camera space
+	 * @param nearY the y intersection of the ray with the plane z = -1 in camera space
+	 */
+	public static void projectOntoGround(float[] result, float[] viewMatrix, float nearX, float nearY) {
+		float[] inverseView = new float[16];
+		Matrix.invertM(inverseView, 0, viewMatrix, 0);
+		float[] eyeAndVec = {0, 0, 0, 1, nearX, nearY, -1, 1};
+		float[] transformedVecs = new float[8];
+		//transform eye and near vec into camera space
+		Matrix.multiplyMV(transformedVecs, 0, inverseView, 0, eyeAndVec, 0);
+		Matrix.multiplyMV(transformedVecs, 4, inverseView, 0, eyeAndVec, 4);
+
+		float dy = transformedVecs[5] - transformedVecs[1];
+		if (dy != 0) {
+			//solve for t
+			float t = -transformedVecs[1] / dy;
+
+			//plug back in to find x and z
+			float dx = transformedVecs[4] - transformedVecs[0];
+			float dz = transformedVecs[6] - transformedVecs[2];
+			float projectedX = transformedVecs[0] + dx * t;
+			float projectedZ = transformedVecs[2] + dz * t;
+
+			result[0] = projectedX;
+			result[1] = projectedZ;
+		}
+	}
+
 	public static Quad pick(Room room, float[] viewMatrix, float nearX, float nearY) {
 		float[] inverseModel = new float[16];
 		float[] composed = new float[16];
@@ -38,7 +71,8 @@ public class RaycastUtils {
 		float[] inverseView = new float[16];
 		Matrix.invertM(inverseView, 0, viewMatrix, 0);
 		float[] eyeAndVec = {0, 0, 0, 1, nearX, nearY, -1, 1};
-		
+
+		//TODO how to pick a non-character entity?
 		for (Character c : room.characters) {
 			Quad q = c.quad;
 			Matrix.invertM(inverseModel, 0, q.modelMatrix, 0);
@@ -48,7 +82,6 @@ public class RaycastUtils {
 			Matrix.multiplyMV(transformedVecs, 4, composed, 0, eyeAndVec, 4);
 			
 			float dz = transformedVecs[6] - transformedVecs[2];
-			Log.d("touch", "character dz: " + dz);
 			if (dz != 0) {
 				float t = -transformedVecs[2] / dz;
 				float dx = transformedVecs[4] - transformedVecs[0];

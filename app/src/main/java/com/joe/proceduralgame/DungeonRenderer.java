@@ -19,7 +19,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	public static final float NEAR_PLANE = 1;
 	public static final float CAMERA_ANGLE = 60;
 	//The fraction of the distance to the focus covered in one second
-	public static final float CAMERA_SPEED = .90f;
+	public static final float FOCUS_CAM_SPEED = .90f, PANNING_CAM_SPEED = .99f;
 	
 	private GameGLView gameView;
 	private TextureManager textureManager;
@@ -34,6 +34,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	private float fov = 45;
 	public float nearWidth, nearHeight;
 	float camx, camy = 8, camz;
+	float destx, destz;
 	private Entity focus;
 	private long lastDrawTime;
 	
@@ -178,18 +179,23 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	 */
 	private void updateCamera(double dt) {
 		float deltax, deltaz;
+		float factor;
 		synchronized (this) {
-			if (focus == null)
-				return;
-			deltax = focus.posx - camx;
-			deltaz = focus.posz - camz;
+			if (focus != null) {
+				factor = (float) Math.pow(1 - FOCUS_CAM_SPEED, dt);
+				destx = focus.posx;
+				destz = focus.posz;
+			} else {
+				factor = (float) Math.pow(1 - PANNING_CAM_SPEED, dt);
+			}
 		}
+		deltax = destx - camx;
+		deltaz = destz - camz;
 		double dist = Math.hypot(deltax, deltaz);
 		if (dist < .001f) {
 			camx += deltax;
 			camz += deltaz;
 		} else {
-			float factor = (float) Math.pow(1 - CAMERA_SPEED, dt);
 			camx += deltax * (1 - factor);
 			camz += deltaz * (1 - factor);
 		}
