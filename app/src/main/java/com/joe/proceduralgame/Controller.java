@@ -209,6 +209,21 @@ public class Controller {
 				float dz = touchAnchor[1] - touchPos[1];
 				renderer.destx = renderer.camx + dx;
 				renderer.destz = renderer.camz + dz;
+				//Confine camera to current room
+				if (renderer.destx < manager.currentRoom.originx) {
+					renderer.destx = manager.currentRoom.originx;
+					touchAnchor[0] = touchPos[0];
+				} else if (renderer.destx > manager.currentRoom.originx + manager.currentRoom.width) {
+					renderer.destx = manager.currentRoom.originx + manager.currentRoom.width;
+					touchAnchor[0] = touchPos[0];
+				}
+				if (renderer.destz < manager.currentRoom.originz) {
+					renderer.destz = manager.currentRoom.originz;
+					touchAnchor[1] = touchPos[1];
+				} else if (renderer.destz > manager.currentRoom.originz + manager.currentRoom.length) {
+					renderer.destz = manager.currentRoom.originz + manager.currentRoom.length;
+					touchAnchor[1] = touchPos[1];
+				}
 			}
 		}
 		return true;
