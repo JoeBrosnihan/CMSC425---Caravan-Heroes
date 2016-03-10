@@ -210,19 +210,27 @@ public class Controller {
 				renderer.destx = renderer.camx + dx;
 				renderer.destz = renderer.camz + dz;
 				//Confine camera to current room
-				if (renderer.destx < manager.currentRoom.originx) {
-					renderer.destx = manager.currentRoom.originx;
-					touchAnchor[0] = touchPos[0];
-				} else if (renderer.destx > manager.currentRoom.originx + manager.currentRoom.width) {
-					renderer.destx = manager.currentRoom.originx + manager.currentRoom.width;
-					touchAnchor[0] = touchPos[0];
+				final float left = manager.currentRoom.originx,
+						right = manager.currentRoom.originx + manager.currentRoom.width - 1,
+						near = manager.currentRoom.originz + manager.currentRoom.length - 1,
+						far = manager.currentRoom.originz;
+				if (renderer.destx < left) {
+					renderer.destx = left;
+					if (renderer.camx < left + .1f && dx < 0)
+						touchAnchor[0] = touchPos[0];
+				} else if (renderer.destx > right) {
+					renderer.destx = right;
+					if (renderer.camx > right - .1f && dx > 0)
+						touchAnchor[0] = touchPos[0];
 				}
-				if (renderer.destz < manager.currentRoom.originz) {
-					renderer.destz = manager.currentRoom.originz;
-					touchAnchor[1] = touchPos[1];
-				} else if (renderer.destz > manager.currentRoom.originz + manager.currentRoom.length) {
-					renderer.destz = manager.currentRoom.originz + manager.currentRoom.length;
-					touchAnchor[1] = touchPos[1];
+				if (renderer.destz < far) {
+					renderer.destz = far;
+					if (renderer.camz < far + .1f && dz < 0)
+						touchAnchor[1] = touchPos[1];
+				} else if (renderer.destz > near) {
+					renderer.destz = near;
+					if (renderer.camz > near - .1f && dz > 0)
+						touchAnchor[1] = touchPos[1];
 				}
 			}
 		}
