@@ -83,6 +83,21 @@ public abstract class Character extends AttackableEntity {
 				updateModelMatrix();
 		}
 	}
+
+	/**
+	 * Changes the direction this character is facing.
+	 *
+	 * Updates the model matrix.
+	 *
+	 * @param newDir the new direction to face
+	 */
+	public void setDirection(int newDir) {
+		dir = newDir;
+		synchronized (this) {
+			if (graphicLoaded)
+				updateModelMatrix();
+		}
+	}
 	
 	public void updateModelMatrix() {
 		Matrix.setIdentityM(quad.modelMatrix, 0);
@@ -113,9 +128,9 @@ public abstract class Character extends AttackableEntity {
 
 	public void attack(AttackableEntity target) {
 		if (target.posx > posx)
-			dir = 1;
+			setDirection(1);
 		if (target.posx < posx)
-			dir = -1;
+			setDirection(-1);
 		setState(STATE_ATTACKING);
 		attackTarget = target;
 		if (attackSound != null)
@@ -141,9 +156,9 @@ public abstract class Character extends AttackableEntity {
 		this.destx = destx;
 		this.destz = destz;
 		if (destx > posx)
-			dir = 1;
+			setDirection(1);
 		if (destx < posx)
-			dir = -1;
+			setDirection(-1);
 		setState(STATE_WALKING);
 	}
 

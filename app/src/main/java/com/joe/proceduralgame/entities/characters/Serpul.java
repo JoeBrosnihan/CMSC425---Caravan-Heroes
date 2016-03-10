@@ -40,31 +40,31 @@ public class Serpul extends com.joe.proceduralgame.Character {
 		case STATE_WAITING:
 			animTime = (System.currentTimeMillis() - stateStartTime) % 1200;
 			if (animTime < 600)
-				newIndex = 38;
-			else
 				newIndex = 39;
+			else
+				newIndex = 38;
 			break;
 		case STATE_WALKING:
 			animTime = (System.currentTimeMillis() - stateStartTime) % 600;
 			if (animTime < 200)
-				newIndex = 45;
-			else if (animTime < 200)
 				newIndex = 46;
+			else if (animTime < 200)
+				newIndex = 45;
 			else
-				newIndex = 47;
+				newIndex = 44;
 			break;
 		case STATE_ATTACKING:
 			animTime = System.currentTimeMillis() - stateStartTime;
 			if (animTime < 100)
-				newIndex = 45;
+				newIndex = 46;
 			else if (animTime < 200)
-				newIndex = 53;
+				newIndex = 55;
 			else if (animTime < 400)
 				newIndex = 54;
 			else if (animTime < 500)
-				newIndex = 55;
+				newIndex = 53;
 			else
-				newIndex = 62;
+				newIndex = 63;
 			break;
 		case STATE_TAKING_DAMAGE:
 			animTime = System.currentTimeMillis() - stateStartTime;
@@ -72,9 +72,9 @@ public class Serpul extends com.joe.proceduralgame.Character {
 				if (animTime % 160 >= 120)
 					return;
 				else
-					newIndex = 44;
+					newIndex = 47;
 			} else {
-				newIndex = 44;
+				newIndex = 47;
 			}
 			break;
 		case STATE_DEAD:
@@ -82,7 +82,7 @@ public class Serpul extends com.joe.proceduralgame.Character {
 			if (animTime % 160 >= 120)
 				return;
 			else
-				newIndex = 63;
+				newIndex = 62;
 			break;
 		}
 
