@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="80dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context=".GameActivity" >
 
     <SurfaceView
@@ -22,7 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:id="@+id/character_summary">
+        android:id="@+id/character_summary"
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -49,7 +50,7 @@
                 <com.joe.proceduralgame.HealthBar
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/view"
+                    android:id="@+id/health_bar"
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true"/>
 
@@ -72,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:text="5 / 7"
-                    android:id="@+id/health_display"/>
+                    android:id="@+id/health_text"/>
 
             </LinearLayout>
 

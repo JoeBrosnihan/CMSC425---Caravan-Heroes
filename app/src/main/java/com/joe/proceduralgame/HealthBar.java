@@ -13,13 +13,16 @@ import android.view.View;
  */
 public class HealthBar extends View {
 
+	private int health, maxHealth;
+
 	public HealthBar(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		maxHealth = 1;
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		float healthDegrees = 315;
+		float healthDegrees = 360.0f * health / maxHealth;
 
 		Paint paint = new Paint();
 		RectF bounds = new RectF(canvas.getClipBounds());
@@ -27,6 +30,12 @@ public class HealthBar extends View {
 		canvas.drawArc(bounds, -90 + healthDegrees, 360 - healthDegrees, true, paint);
 		paint.setColor(Color.GREEN);
 		canvas.drawArc(bounds, -90, healthDegrees, true, paint);
+	}
+
+	public void showHealth(int health, int maxHealth) {
+		this.health = health;
+		this.maxHealth = maxHealth;
+		invalidate();
 	}
 
 }

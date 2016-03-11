@@ -230,9 +230,11 @@ public abstract class Character extends AttackableEntity {
 
 	@Override
 	public void takeHit(Character attacker, int baseDamage) {
-		int effectiveDamage = baseDamage - defense;
-		takeDamage(effectiveDamage);
 		setState(STATE_TAKING_DAMAGE);
+		int effectiveDamage = baseDamage - defense;
+		if (effectiveDamage <= 0)
+			return;
+		takeDamage(effectiveDamage);
 		currentRoom.addDamageDisplay(new DamageDisplay(effectiveDamage, quad.textureUnit, posx, posz));
 	}
 
@@ -372,7 +374,7 @@ public abstract class Character extends AttackableEntity {
 
 	/**
 	 * Subtracts from this Character's health
-	 * @param damage the amount to subtract
+	 * @param damage the positive int amount to subtract
 	 */
 	private void takeDamage(int damage) {
 		hitPoints = Math.max(0, hitPoints - damage);

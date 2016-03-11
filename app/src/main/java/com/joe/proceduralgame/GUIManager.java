@@ -11,6 +11,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 /**
  * Provides an interface for the Controller and DungeonManager to modify the GUI
  *
@@ -81,6 +83,10 @@ public class GUIManager {
 				characterSummary.setVisibility(View.VISIBLE);
 				ImageView characterIcon = (ImageView) characterSummary.findViewById(R.id.character_icon);
 				characterIcon.setImageResource(character.getIconID());
+				HealthBar healthBar = (HealthBar) characterSummary.findViewById(R.id.health_bar);
+				healthBar.showHealth(character.getHitPoints(), character.getMaxHitPoints());
+				TextView healthText = (TextView) characterSummary.findViewById(R.id.health_text);
+				healthText.setText(character.getHitPoints() + " / " + character.getMaxHitPoints());
 			}
 		});
 	}
