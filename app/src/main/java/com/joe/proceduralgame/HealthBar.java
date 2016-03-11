@@ -26,9 +26,9 @@ public class HealthBar extends View {
 
 		Paint paint = new Paint();
 		RectF bounds = new RectF(canvas.getClipBounds());
-		paint.setColor(Color.RED);
+		paint.setColor(Color.rgb(225, 0, 0));
 		canvas.drawArc(bounds, -90 + healthDegrees, 360 - healthDegrees, true, paint);
-		paint.setColor(Color.GREEN);
+		paint.setColor(Color.rgb(0, 225, 0));
 		canvas.drawArc(bounds, -90, healthDegrees, true, paint);
 	}
 
