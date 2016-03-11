@@ -142,11 +142,12 @@ public class Controller {
 						Character character = RaycastUtils.quadToCharacter(room, targetQuad);
 						if (character.isPlayerOwned()) {
 							selectCharacter(character);
+							gui.showCharacterSummary(character);
 							Action[] actions = character.getPossibleActions();
 							gui.showActionPane(actions, getActionVisibilities(character, actions));
 						}
 					}
-				} else { //selectedCharacter != null
+				} else { //selectedCharacter is not null
 					if (selectedAction == null) {
 						if (targetQuad.type == Type.FLOOR) {
 							int targetRow = Math.round(targetQuad.getZ() - room.originz);
@@ -156,6 +157,7 @@ public class Controller {
 							Character character = RaycastUtils.quadToCharacter(room, targetQuad);
 							if (character.isPlayerOwned()) {
 								selectCharacter(character);
+								gui.showCharacterSummary(character);
 								Action[] actions = character.getPossibleActions();
 								gui.showActionPane(actions, getActionVisibilities(character, actions));
 							}
@@ -169,6 +171,7 @@ public class Controller {
 								manager.commandAction(selectedCharacter, null, selectedAction, targetEntity);
 								selectedAction = null;
 								gui.hideActionPane();
+								gui.hideCharacterSummary();
 								renderer.hideMoveOptions();
 							}
 						}

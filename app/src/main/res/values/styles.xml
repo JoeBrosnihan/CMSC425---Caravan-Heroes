@@ -17,10 +17,6 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
-    <style name="gui_pane">
-        <item name="android:background">#c735417b</item>
-    </style>
-
     <style name="action_label_style">
         <item name="android:textColor">#ffffff</item>
         <item name="android:padding">@dimen/action_label_padding</item>

@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="80dp"
     tools:context=".GameActivity" >
 
     <SurfaceView
@@ -16,70 +16,69 @@
                   android:layout_height="wrap_content"
                   android:orientation="vertical"
                   android:id="@+id/action_list"
-                  style="@style/gui_pane"/>
+                  android:background="#c735417b"/>
 
-    <LinearLayout
-        style="@style/gui_pane"
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/linearLayout"
         android:layout_alignParentRight="true"
-        android:padding="5dp">
+        android:id="@+id/character_summary">
 
-        <FrameLayout
-            android:layout_width="@dimen/character_icon_size"
-            android:layout_height="@dimen/character_icon_size">
-
-            <ImageView
-                android:layout_width="@dimen/character_icon_size"
-                android:layout_height="@dimen/character_icon_size"
-                android:id="@+id/imageView2"
-                android:src="@drawable/icon_green"/>
-
-            <ImageView
-                android:layout_width="@dimen/character_icon_size"
-                android:layout_height="@dimen/character_icon_size"
-                android:id="@+id/imageView"
-                android:src="@drawable/swordsman_icon"/>
-        </FrameLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView"
+            android:src="@drawable/overhead_plank"
+            android:adjustViewBounds="true"
+            android:maxHeight="50dp"
+            android:layout_gravity="center"/>
 
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingLeft="5dp">
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentRight="true"
+            android:padding="5dp"
+            android:visibility="visible">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="5 / 7"
-                android:id="@+id/textView"/>
+            <FrameLayout
+                android:layout_width="@dimen/character_icon_size"
+                android:layout_height="@dimen/character_icon_size">
+
+                <com.joe.proceduralgame.HealthBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/view"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"/>
+
+                <ImageView
+                    android:layout_width="@dimen/character_icon_size"
+                    android:layout_height="@dimen/character_icon_size"
+                    android:id="@+id/character_icon"
+                    android:src="@drawable/swordsman_icon"/>
+
+            </FrameLayout>
 
             <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="@dimen/health_bar_width"
-                android:layout_height="@dimen/health_bar_height"
-                android:id="@+id/health_bar"
-                android:background="#ba0000">
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp">
 
-                <View
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="#0fb700"/>
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="5 / 7"
+                    android:id="@+id/health_display"/>
 
-                <View
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
             </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </FrameLayout>
 
     <ImageView
         android:layout_width="wrap_content"

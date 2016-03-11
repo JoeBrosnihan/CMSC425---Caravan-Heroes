@@ -67,6 +67,38 @@ public class GUIManager {
 		});
 	}
 
+	/**
+	 * Inflates the overlay that shows basic info of a character.
+	 *
+	 * @param character the character to inspect
+	 */
+	public void showCharacterSummary(final Character character) {
+		final ViewGroup characterSummary = (ViewGroup) activity.findViewById(R.id.character_summary);
+
+		characterSummary.getHandler().post(new Runnable() {
+			@Override
+			public void run() {
+				characterSummary.setVisibility(View.VISIBLE);
+				ImageView characterIcon = (ImageView) characterSummary.findViewById(R.id.character_icon);
+				characterIcon.setImageResource(character.getIconID());
+			}
+		});
+	}
+
+	/**
+	 * Hides the basic character info overlay.
+	 */
+	public void hideCharacterSummary() {
+		final ViewGroup characterSummary = (ViewGroup) activity.findViewById(R.id.character_summary);
+
+		characterSummary.getHandler().post(new Runnable() {
+			@Override
+			public void run() {
+				characterSummary.setVisibility(View.GONE);
+			}
+		});
+	}
+
     /**
      * (Re)Inflates the action pane and populates it with entries (icons and labels) for the given
      * actions.

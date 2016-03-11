@@ -74,6 +74,15 @@ public abstract class Character extends AttackableEntity {
 		this.maxHitPoints = maxHitPoints;
 		this.moveDistance = moveDistance;
 	}
+
+	/**
+	 * Gets the resource id of the icon for this character.
+	 *
+	 * @return the int resource id (default -1)
+	 */
+	public int getIconID() {
+		return -1;
+	}
 	
 	@Override
 	public void setPosition(float x, float z) {
