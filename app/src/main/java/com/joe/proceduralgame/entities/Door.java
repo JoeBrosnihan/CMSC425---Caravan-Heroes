@@ -12,7 +12,7 @@ import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 public class Door extends EdgeEntity {
 	public int dir;
 	public Quad doorQuad, frameQuad;
-	public float openAngle = 30f;
+	public float openAngle = 0;
 	
 	@Override
 	public void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion { // TODO load all entities in a room
@@ -29,9 +29,7 @@ public class Door extends EdgeEntity {
 
 	@Override
 	public void draw(int shaderProgram, float[] mVPMatrix) {
-		openAngle = (float) Math.sin(System.currentTimeMillis() * .001) * 45f;
-		
-		float doorShift = .25f;
+		final float doorShift = .25f;
 		Matrix.translateM(doorQuad.modelMatrix, 0, frameQuad.modelMatrix, 0, -doorShift, 0, 0);
 		Matrix.rotateM(doorQuad.modelMatrix, 0, openAngle, 0, 1, 0);
 		Matrix.translateM(doorQuad.modelMatrix, 0, doorShift, 0, 0);
