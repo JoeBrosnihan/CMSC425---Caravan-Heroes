@@ -102,7 +102,9 @@ public class Archer extends com.joe.proceduralgame.Character {
 			quad.uvScale[0] = scaleX / (float) N_COL; // u scale
 			quad.uvScale[1] = scaleY / (float) N_COL; // v scale
 
+			preDraw(shaderProgram, mVPMatrix);
 			quad.draw(shaderProgram, mVPMatrix);
+			postDraw(shaderProgram, mVPMatrix);
 		}
 	}
 

@@ -279,6 +279,11 @@ public class DungeonManager extends Thread {
 	private void becomeTranquil() {
 		tranquil = true;
 
+		for (Character c : currentRoom.characters) {
+			if (c.actedThisTurn && c.getGroupID() == phaseGroup)
+				c.actedMark = true;
+		}
+
 		if (waitingToEndPhase)
 			endPhase();
 		else if (phaseGroup == Character.GROUP_ENEMY)

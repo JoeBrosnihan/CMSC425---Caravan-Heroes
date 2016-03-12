@@ -97,7 +97,10 @@ public class Ghoul extends com.joe.proceduralgame.Character {
 			quad.uvOrigin[1] = (newIndex / N_COL) / (float) N_COL; // v coord
 			quad.uvScale[0] = scaleX / (float) N_COL; // u scale
 			quad.uvScale[1] = scaleY / (float) N_COL; // v scale
+
+			preDraw(shaderProgram, mVPMatrix);
 			quad.draw(shaderProgram, mVPMatrix);
+			postDraw(shaderProgram, mVPMatrix);
 		}
 	}
 

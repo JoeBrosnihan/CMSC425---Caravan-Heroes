@@ -1,6 +1,7 @@
 package com.joe.proceduralgame;
 
 import android.media.MediaPlayer;
+import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import java.util.LinkedList;
@@ -35,6 +36,7 @@ public abstract class Character extends AttackableEntity {
 	 */
 	public boolean stateActionPerformed;
 	public boolean actedThisTurn = false;
+	public boolean actedMark = false;
 	public MediaPlayer attackSound;
 
 	public Quad quad;
@@ -281,6 +283,7 @@ public abstract class Character extends AttackableEntity {
 	 */
 	public void phaseReset() {
 		actedThisTurn = false;
+		actedMark = false;
 		squaresTraversed = 0;
 	}
 
@@ -378,6 +381,34 @@ public abstract class Character extends AttackableEntity {
 	 */
 	private void takeDamage(int damage) {
 		hitPoints = Math.max(0, hitPoints - damage);
+	}
+
+	/**
+	 * Set up any necessary draw parameters.
+	 * Called before this Character is drawn.
+	 *
+	 * @param shaderProgram int handle for the active shader program
+	 * @param mVPMatrix float[16] View Projection matrix
+	 */
+	protected final void preDraw(int shaderProgram, float[] mVPMatrix) {
+		if (actedMark) {
+			int multiplyHandle = GLES20.glGetUniformLocation(shaderProgram, "uColorMultiplier");
+			GLES20.glUniform4f(multiplyHandle, .6f, .6f, .6f, 1);
+		}
+	}
+
+	/**
+	 * Clean up any necessary draw parameters.
+	 * Called after this Character is drawn.
+	 *
+	 * @param shaderProgram int handle for the active shader program
+	 * @param mVPMatrix float[16] View Projection matrix
+	 */
+	protected final void postDraw(int shaderProgram, float[] mVPMatrix) {
+		if (actedMark) {
+			int multiplyHandle = GLES20.glGetUniformLocation(shaderProgram, "uColorMultiplier");
+			GLES20.glUniform4f(multiplyHandle, 1, 1, 1, 1);
+		}
 	}
 
 }
