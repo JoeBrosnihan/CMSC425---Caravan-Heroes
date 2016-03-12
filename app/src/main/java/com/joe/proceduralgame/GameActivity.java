@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 public class GameActivity extends Activity {
 	
-	private GLSurfaceView glView;
+	private GameGLView glView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,5 +27,13 @@ public class GameActivity extends Activity {
         getMenuInflater().inflate(R.menu.game, menu);
         return true;
     }
+
+	/**
+	 * Called when the user presses the back button.
+	 */
+	@Override
+	public void onBackPressed() {
+		glView.onBackPressed();
+	}
     
 }

@@ -41,6 +41,13 @@ public class GameGLView extends GLSurfaceView {
 	public boolean onTouchEvent(MotionEvent e) {
 		return gameController.onTouchEvent(e);
 	}
+
+	/**
+	 * Called when the user presses the back button.
+	 */
+	public void onBackPressed() {
+		gameController.onBackPressed();
+	}
 	
 	public int loadShader(int type, int resID) {
 		String shaderCode = readTxt(resID);

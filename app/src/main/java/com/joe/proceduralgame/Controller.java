@@ -206,6 +206,23 @@ public class Controller {
 		}
 	}
 
+	/**
+	 * Called when the user presses the back button.
+	 */
+	public void onBackPressed() {
+		if (manager.neutral) {
+		} else { //manager.neutral is false
+			if (selectedCharacter == null) {
+			} else { //selectedCharacter is not null
+				if (selectedAction == null) {
+					deselectCharacter();
+				} else { //selectedAction is not null
+					deselectAction();
+				}
+			}
+		}
+	}
+
 	private float[] touchPos = new float[2];
 	public boolean onTouchEvent(MotionEvent e) {
 		float nearX = (e.getX() / view.getWidth() - .5f) * renderer.nearWidth;
