@@ -167,6 +167,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 
 	/**
 	 * Stops highlighting squares indicating where a character can move
+	 * May be called if no squares are highlighted
 	 */
 	public void hideMoveOptions() {
 		moveOptionQuads = null;

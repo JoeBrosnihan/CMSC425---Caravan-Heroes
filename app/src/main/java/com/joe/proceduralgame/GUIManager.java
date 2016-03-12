@@ -11,8 +11,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 /**
  * Provides an interface for the Controller and DungeonManager to modify the GUI
  *
@@ -105,47 +103,61 @@ public class GUIManager {
 		});
 	}
 
-    /**
-     * (Re)Inflates the action pane and populates it with entries (icons and labels) for the given
-     * actions.
-     * @param actions an array of Actions to display
-     * @param visibilities an array of the corresponding visibilities of each Action
-     */
-    public void showActionPane(final Action[] actions, final Action.Visibility[] visibilities) {
-	    final ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
+	/**
+	 * (Re)Inflates the action pane and populates it with entries (icons and labels) for the given
+	 * actions.
+	 * @param actions an array of Actions to display
+	 * @param visibilities an array of the corresponding visibilities of each Action
+	 */
+	public void showActionPane(final Action[] actions, final Action.Visibility[] visibilities) {
+		final ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
 
-	    actionList.getHandler().post(new Runnable() {
-		    @Override
-		    public void run() {
-			    actionList.removeAllViews(); //clear children in case it
-			    LayoutInflater inflater = activity.getLayoutInflater();
-			    //TODO need to synchronize on the game thread if checking actions
-			    //or maybe I should design somehow else to avoid this complexity
-			    for (int i = 0; i < actions.length; i++) {
-				    if (visibilities[i] != Action.Visibility.HIDDEN) {
-					    final int index = i;
-					    final ViewGroup entry = (ViewGroup) inflater.inflate(R.layout.layout_action_entry, null);
-					    if (visibilities[index] == Action.Visibility.NOT_SELECTABLE) {
-						    ((TextView) entry.findViewById(R.id.action_label)).setTextColor(Color.GRAY);
-						    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-							    entry.findViewById(R.id.action_icon).setAlpha(.7f);
-						    }
-					    } else if (visibilities[index] == Action.Visibility.SELECTABLE) {
-						    entry.setOnClickListener(new View.OnClickListener() {
-							    @Override
-							    public void onClick(View v) {
-								    selectAction(entry, actions[index]);
-							    }
-						    });
-					    }
-					    actionList.addView(entry);
-					    ((TextView) entry.findViewById(R.id.action_label)).setText(actions[i].name);
-					    ((ImageView) entry.findViewById(R.id.action_icon)).setImageResource(actions[i].icon_id);
-				    }
-			    }
-		    }
-	    });
-    }
+		actionList.getHandler().post(new Runnable() {
+			@Override
+			public void run() {
+				actionList.removeAllViews(); //clear children in case it
+				LayoutInflater inflater = activity.getLayoutInflater();
+				//TODO need to synchronize on the game thread if checking actions
+				//or maybe I should design somehow else to avoid this complexity
+				for (int i = 0; i < actions.length; i++) {
+					if (visibilities[i] != Action.Visibility.HIDDEN) {
+						final int index = i;
+						final ViewGroup entry = (ViewGroup) inflater.inflate(R.layout.layout_action_entry, null);
+						if (visibilities[index] == Action.Visibility.NOT_SELECTABLE) {
+							((TextView) entry.findViewById(R.id.action_label)).setTextColor(Color.GRAY);
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+								entry.findViewById(R.id.action_icon).setAlpha(.7f);
+							}
+						} else if (visibilities[index] == Action.Visibility.SELECTABLE) {
+							entry.setOnClickListener(new View.OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									selectAction(entry, actions[index]);
+								}
+							});
+						}
+						actionList.addView(entry);
+						((TextView) entry.findViewById(R.id.action_label)).setText(actions[i].name);
+						((ImageView) entry.findViewById(R.id.action_icon)).setImageResource(actions[i].icon_id);
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * Clears the highlight on the currently selected action.
+	 */
+	public void deselectAction() {
+		final ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
+
+		actionList.getHandler().post(new Runnable() {
+			@Override
+			public void run() {
+				clearActionHighlights();
+			}
+		});
+	}
 
 	/**
 	 * Hides the action pane.
@@ -163,6 +175,18 @@ public class GUIManager {
 	}
 
 	/**
+	 * Removes highlights from all actions in the action pane.
+	 */
+	private void clearActionHighlights() {
+		ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
+		int nChildren = actionList.getChildCount();
+		for (int i = 0; i < nChildren; i++) {
+			View entry = actionList.getChildAt(i);
+			entry.setBackgroundColor(Color.TRANSPARENT);
+		}
+	}
+
+	/**
 	 * Called when an action is selected via click in the action pane
 	 *
 	 * Notifies the controller and clears other
@@ -171,7 +195,7 @@ public class GUIManager {
 	 * @param action the action selected
 	 */
 	private void selectAction(ViewGroup actionEntry, Action action) {
-		//TODO clear others
+		clearActionHighlights();
 
 		actionEntry.setBackgroundColor(Color.rgb(220, 180, 0));
 		controller.onActionSelected(action);

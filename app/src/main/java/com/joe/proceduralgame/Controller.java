@@ -38,7 +38,27 @@ public class Controller {
 	}
 
 	/**
-	 * Called when the user tries to move the selectedCharacter to a square
+	 * Handles when the user purposefully deselects a character.
+	 */
+	private void deselectCharacter() {
+		selectedCharacter = null;
+		renderer.setFocus(null);
+		renderer.hideMoveOptions();
+		gui.hideActionPane();
+		gui.hideCharacterSummary();
+	}
+
+	/**
+	 * Handles when the user purposefully deselects their selected action.
+	 */
+	private void deselectAction() {
+		selectedAction = null;
+		gui.deselectAction();
+	}
+
+	/**
+	 * Handles when the user tries to move the selectedCharacter to a square.
+	 * selectedCharacter must a Character in the currentRoom.
 	 *
 	 * @param targetRow the row of the square
 	 * @param targetCol the col of the square
@@ -47,14 +67,14 @@ public class Controller {
 		Room room = manager.currentRoom;
 		LinkedList<int[]> path = room.findPath(selectedCharacter.gridRow,
 				selectedCharacter.gridCol, targetRow, targetCol, true);
-		if (path == null)
-			return;
 		int moveSquaresLeft = selectedCharacter.getMoveDistance() - selectedCharacter.getSquaresTraversed();
-		if (path.size() > moveSquaresLeft)
-			return;
-		manager.commandMove(selectedCharacter, path);
-		gui.hideActionPane();
-		renderer.hideMoveOptions();
+		if (path == null || path.size() > moveSquaresLeft) {
+			deselectCharacter();
+		} else {
+			manager.commandMove(selectedCharacter, path);
+			gui.hideActionPane();
+			renderer.hideMoveOptions();
+		}
 	}
 
 	/**
@@ -142,6 +162,7 @@ public class Controller {
 						Character character = RaycastUtils.quadToCharacter(room, targetQuad);
 						if (character.isPlayerOwned()) {
 							selectCharacter(character);
+							//TODO should all of the following be moved to within selectCharacter()?
 							gui.showCharacterSummary(character);
 							Action[] actions = character.getPossibleActions();
 							gui.showActionPane(actions, getActionVisibilities(character, actions));
@@ -157,6 +178,7 @@ public class Controller {
 							Character character = RaycastUtils.quadToCharacter(room, targetQuad);
 							if (character.isPlayerOwned()) {
 								selectCharacter(character);
+								//TODO should all of the following be moved to within selectCharacter()?
 								gui.showCharacterSummary(character);
 								Action[] actions = character.getPossibleActions();
 								gui.showActionPane(actions, getActionVisibilities(character, actions));
@@ -174,6 +196,9 @@ public class Controller {
 								gui.hideCharacterSummary();
 								renderer.hideMoveOptions();
 							}
+							deselectAction();
+						} else {
+							deselectAction();
 						}
 					}
 				}
