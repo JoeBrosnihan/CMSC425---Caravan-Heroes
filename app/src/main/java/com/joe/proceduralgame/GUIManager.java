@@ -195,10 +195,13 @@ public class GUIManager {
 	 * @param action the action selected
 	 */
 	private void selectAction(ViewGroup actionEntry, Action action) {
-		clearActionHighlights();
-
-		actionEntry.setBackgroundColor(Color.rgb(220, 180, 0));
-		controller.onActionSelected(action);
+		if (action == controller.getSelectedAction()) {
+			controller.deselectAction();
+		} else {
+			clearActionHighlights();
+			actionEntry.setBackgroundColor(Color.rgb(220, 180, 0));
+			controller.onActionSelected(action);
+		}
 	}
 
 	/**

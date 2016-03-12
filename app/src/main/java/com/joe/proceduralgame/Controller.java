@@ -51,7 +51,7 @@ public class Controller {
 	/**
 	 * Handles when the user purposefully deselects their selected action.
 	 */
-	private void deselectAction() {
+	public void deselectAction() {
 		selectedAction = null;
 		gui.deselectAction();
 	}
@@ -277,6 +277,15 @@ public class Controller {
 			visibilities[i] = actions[i].getVisibility(actor);
 		}
 		return visibilities;
+	}
+
+	/**
+	 * Gets the selected Action.
+	 *
+	 * @return the selectedAction
+	 */
+	public Action getSelectedAction() {
+		return selectedAction;
 	}
 
 }
