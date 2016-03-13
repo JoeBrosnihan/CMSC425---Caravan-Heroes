@@ -9,5 +9,6 @@
     <dimen name="character_icon_size">50dp</dimen>
     <dimen name="health_bar_width">160dp</dimen>
     <dimen name="health_bar_height">5dp</dimen>
+    <dimen name="icon_max_height">30dp</dimen>
 
 </resources>

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
+              android:layout_height="wrap_content"
               android:padding="@dimen/action_label_padding"
               android:clickable="true">
 
@@ -10,7 +10,11 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:id="@+id/action_icon"
-            android:src="@drawable/attack_action_icon"/>
+            android:src="@drawable/attack_action_icon"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:maxHeight="@dimen/icon_max_height"
+            android:longClickable="true"/>
 
         <TextView
             style="@style/action_label_style"
