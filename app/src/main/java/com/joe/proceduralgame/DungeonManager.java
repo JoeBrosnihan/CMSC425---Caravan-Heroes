@@ -206,22 +206,24 @@ public class DungeonManager extends Thread {
 		if (actor == null)
 			return;
 
-		Character target = null;
+		Character bestTarget = null;
+		LinkedList<int[]> bestPath = null;
 		for (Character c : currentRoom.characters) {
 			if (c.isPlayerOwned()) {
-				target = c;
-				break;
+				LinkedList<int[]> path = currentRoom.findPath(actor.gridRow, actor.gridCol, c.gridRow,
+						c.gridCol, false);
+				if (path == null)
+					continue;
+				if (bestPath == null || path.size() < bestPath.size()) {
+					bestTarget = c;
+					bestPath = path;
+				}
 			}
 		}
-		if (target == null)
+		if (bestTarget == null)
 			return;
 
-		LinkedList<int[]> path = currentRoom.findPath(actor.gridRow, actor.gridCol, target.gridRow,
-				target.gridCol, false);
-		if (path == null)
-			return;
-
-		commandAction(actor, path, Action.basicAttack, target);
+		commandAction(actor, bestPath, Action.basicAttack, bestTarget);
 	}
 
 	/**
