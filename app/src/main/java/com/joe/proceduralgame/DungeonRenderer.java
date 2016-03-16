@@ -142,6 +142,13 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 
 	    // Calculate the projection and view transformation
 	    Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+
+		//Spin the attack option selectors
+		if (attackOptionQuads != null) {
+			for (Quad q : attackOptionQuads) {
+				Matrix.rotateM(q.modelMatrix, 0, (float) dt * 180.0f, 0, 0, 1);
+			}
+		}
 		
 	    catchGLError();
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -185,6 +192,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 			Matrix.setIdentityM(modelMatrix, 0);
 			Matrix.translateM(modelMatrix, 0, t.posx, .05f, t.posz);
 			Matrix.rotateM(modelMatrix, 0, 90, 1, 0, 0);
+			Matrix.scaleM(modelMatrix, 0, .8f, .8f, 1);
 			Quad q = Quad.createDynamicQuad(Type.DECORATION, modelMatrix, uiTextureUnit);
 			q.uvOrigin[0] = 4f / 8f;
 			q.uvOrigin[1] = 2f / 8f;
