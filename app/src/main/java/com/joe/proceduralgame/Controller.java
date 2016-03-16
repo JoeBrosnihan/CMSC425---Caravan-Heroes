@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class Controller {
 	public static final float MIN_DIST_TO_START_PANNING = .5f;
@@ -54,6 +55,7 @@ public class Controller {
 	public void deselectAction() {
 		selectedAction = null;
 		gui.deselectAction();
+		renderer.hideAttackOptions();
 	}
 
 	/**
@@ -100,6 +102,14 @@ public class Controller {
 	 */
 	public void onActionSelected(Action selectedAction) {
 		this.selectedAction = selectedAction;
+
+		if (selectedAction.singleTarget) {
+			if (selectedAction == Action.basicAttack) {
+				//TODO display range?
+				List<Entity> targets = selectedAction.getTargets(selectedCharacter);
+				renderer.showAttackOptions(targets);
+			}
+		}
 	}
 
 	/**

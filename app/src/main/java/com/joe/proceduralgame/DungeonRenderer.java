@@ -2,6 +2,7 @@ package com.joe.proceduralgame;
 
 import java.nio.FloatBuffer;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -42,6 +43,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	private int uiTextureUnit;
 	/** Quads used to highlight squares a character can move to this turn. May be null */
 	private Quad[] moveOptionQuads = null;
+	private Quad[] attackOptionQuads = null;
 	
 	public static void catchGLError() {
 		int a1 = GLES20.GL_INVALID_ENUM;
@@ -91,6 +93,11 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 			}
 			GLES20.glUniform1i(texturelessHandle, 0);
 			GLES20.glUniform4f(colorMultiplierHandle, 1, 1, 1, 1);
+		}
+		if (attackOptionQuads != null) {
+			for (Quad q : attackOptionQuads) {
+				q.draw(program, mVPMatrix);
+			}
 		}
     	
 	    GLES20.glDisable(GLES20.GL_CULL_FACE);
@@ -163,6 +170,35 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 			Quad quad = Quad.createDynamicQuad(Type.DECORATION, modelMatrix, 0);
 			moveOptionQuads[i] = quad;
 		}
+	}
+
+	/**
+	 * Marks the targets for possible attack
+	 *
+	 * @param targets the Entities to mark
+	 */
+	public void showAttackOptions(List<Entity> targets) {
+		attackOptionQuads = new Quad[targets.size()];
+		int i = 0;
+		for (Entity t : targets) {
+			float[] modelMatrix = new float[16];
+			Matrix.setIdentityM(modelMatrix, 0);
+			Matrix.translateM(modelMatrix, 0, t.posx, .05f, t.posz);
+			Matrix.rotateM(modelMatrix, 0, 90, 1, 0, 0);
+			Quad q = Quad.createDynamicQuad(Type.DECORATION, modelMatrix, uiTextureUnit);
+			q.uvOrigin[0] = 4f / 8f;
+			q.uvOrigin[1] = 2f / 8f;
+			q.uvScale[0] = 1f / 8f;
+			q.uvScale[1] = 1f / 8f;
+			attackOptionQuads[i++] = q;
+		}
+	}
+
+	/**
+	 * Hides any marks for possible attacks
+	 */
+	public void hideAttackOptions() {
+		attackOptionQuads = null;
 	}
 
 	/**

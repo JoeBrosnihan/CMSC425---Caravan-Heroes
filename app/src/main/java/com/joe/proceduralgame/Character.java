@@ -264,21 +264,6 @@ public abstract class Character extends AttackableEntity {
 	}
 
 	/**
-	 * Checks if a square is within this character's attack range
-	 *
-	 * @param targetRow
-	 * @param targetCol
-	 * @return true if the target square can be attacked
-	 */
-	public boolean isWithinAttackRange(int targetRow, int targetCol) {
-		if (targetRow == gridRow)
-			return targetCol == gridCol - 1 || targetCol == gridCol + 1;
-		else if (targetCol == gridCol)
-			return targetRow == gridRow - 1 || targetRow == gridRow + 1;
-		return false;
-	}
-
-	/**
 	 * Resets this Character's per phase state for the beginning of a new phase.
 	 */
 	public void phaseReset() {
