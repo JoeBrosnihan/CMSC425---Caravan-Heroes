@@ -109,10 +109,16 @@ public class RoomGenerator {
 						if (room.edges[room.edgeIndexAt(posx, posz)] == null) {
 							if (adjRow < 0 || adjRow >= room.length || adjCol < 0 || adjCol >= room.width) {
 								addWallQuad(room, row, col, i, R.drawable.dungeonwalltile3);
+								if (rand.nextFloat() < .1f)
+									addTorch(room, row, col, i, R.drawable.objtorch2);
+									///
 								continue;
 							}
-							if (room.grid[adjRow][adjCol] == SolidBlock.singleton)
+							if (room.grid[adjRow][adjCol] == SolidBlock.singleton) {
 								addWallQuad(room, row, col, i, R.drawable.dungeonwalltile2);
+								if (rand.nextFloat() < .1f)
+									addTorch(room, row, col, i, R.drawable.objtorch2);
+							}
 						}
 					}
 				}
@@ -128,7 +134,24 @@ public class RoomGenerator {
 		Quad floor = Quad.createStaticQuad(Type.FLOOR, model, texture);
 		room.staticQuads.add(floor);
 	}
-	
+
+	private void addTorch(Room room, int row, int col, int dir, int texture) {
+		float[] model = new float[16];
+		Matrix.setIdentityM(model, 0);
+		Matrix.translateM(model, 0, room.originx + col, 0, room.originz + row);
+		Matrix.rotateM(model, 0, 90 + dir * 90, 0, 1, 0);
+		Matrix.translateM(model, 0, 0, .75f, .45f);
+		Matrix.scaleM(model, 0, .3f, .3f, 0);
+		Quad wall = Quad.createStaticQuad(Type.DECORATION, model, texture);
+		room.staticQuads.add(wall);
+
+		float[] origin = {0, 0, 0.05f, 1};
+		float[] lightPos = new float[4];
+		Matrix.multiplyMV(lightPos, 0, model, 0, origin, 0);
+		RoomLighting.Light light = room.lighting.createLight(lightPos[0], lightPos[1], lightPos[2], .7f, .7f, .5f);
+		room.lighting.addLight(light);
+	}
+
 	private void addWallQuad(Room room, int row, int col, int dir, int texture) {
 		float[] model = new float[16];
 		Matrix.setIdentityM(model, 0);

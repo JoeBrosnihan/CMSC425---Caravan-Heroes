@@ -25,6 +25,9 @@ public class Room {
 	EdgeEntity[] edges;
 	int width, length;
 	int originx, originz;
+
+	//Holds the lights of this room.
+	RoomLighting lighting;
 	//Holds only the static staticQuads of this room.
 	//These quads are loaded by the RoomGenerator. After load, none are added or transformed.
 	List<Quad> staticQuads = new ArrayList<Quad>();
@@ -126,6 +129,7 @@ public class Room {
 	}
 	
 	public void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion { //TODO unload rooms
+		lighting = new RoomLighting();
 		generator.load(this);
 		DungeonRenderer.catchGLError();
 		loadStaticGeometry(tex);

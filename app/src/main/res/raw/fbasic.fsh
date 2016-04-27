@@ -8,9 +8,10 @@ uniform vec2 uvScale;
 uniform vec4 uColorMultiplier;
 uniform bool uTextureless;
 
-#define maxLights 1
+#define maxLights 16
 uniform vec3 lightPos[maxLights];
 uniform vec3 lightColor[maxLights];
+uniform int nLights;
 
 varying vec3 pos;
 varying vec3 norm;
@@ -20,16 +21,15 @@ void main() {
 	vec3 totalLight = vec3(.5f, .5f, .5f);
 	vec3 posToLight;
 	float ndot;
-	for (int i = 0; i < maxLights; i++) {
-		//posToLight = lightPos[i] - pos;
-		posToLight = vec3(5, -1, 3) - pos;
+	for (int i = 0; i < nLights; i++) {
+		posToLight = lightPos[i] - pos;
 		ndot = dot(normalize(posToLight), norm);
 		if (ndot > 0.0f) {
-			//totalLight = totalLight + ndot * lightColor[i];
-			totalLight = totalLight + ndot * vec3(1, .9f, .8f);
-		} else {
-			totalLight = totalLight - ndot * vec3(1, .9f, .8f);
-		}
+            float dist = length(posToLight);
+            //float intensity = ndot / ((dist + 0.707106781186547f) * (dist + 0.707106781186547f));
+            float intensity = ndot * (dist + 1.0f) / (2.0f * dist * dist * dist + dist + 1.0f);
+            totalLight = totalLight + intensity * lightColor[i];
+        }
 	}
     vec4 sample;
     if (uTextureless)
