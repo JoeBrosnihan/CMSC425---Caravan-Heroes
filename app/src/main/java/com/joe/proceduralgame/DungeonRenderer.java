@@ -62,12 +62,19 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		this.textureManager = textureManager;
 		this.dungeonManager = dungeonManager;
 	}
-	
+
+	/**
+	 * Renders the game
+	 */
 	public void draw() {
 	    GLES20.glUseProgram(program);
 
 		int texturelessHandle = GLES20.glGetUniformLocation(program, "uTextureless");
 		GLES20.glUniform1i(texturelessHandle, 0); //draw all quads with textures by default
+		int normallessHandle = GLES20.glGetUniformLocation(program, "uNormalless");
+		GLES20.glUniform1i(normallessHandle, 0); //draw all quads with normals by default
+		int emissiveHandle = GLES20.glGetUniformLocation(program, "uEmissive");
+		GLES20.glUniform1i(emissiveHandle, 0); //draw all quads without emission by default
 		int colorMultiplierHandle = GLES20.glGetUniformLocation(program, "uColorMultiplier");
 		GLES20.glUniform4f(colorMultiplierHandle, 1, 1, 1, 1); //draw all quads without color modification by default
 
@@ -81,6 +88,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
     	catchGLError();
 
 		//Draw box around selected Character
+		GLES20.glUniform1i(emissiveHandle, 1);
     	if (gameController.selectedCharacter != null) {
     		float posx = Math.round(gameController.selectedCharacter.posx); // TODO Could be optimiized to only do these calcs when nec.
     		float posz = Math.round(gameController.selectedCharacter.posz);
@@ -100,21 +108,32 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 			GLES20.glUniform1i(texturelessHandle, 0);
 			GLES20.glUniform4f(colorMultiplierHandle, 1, 1, 1, 1);
 		}
+
+		//Draw targets around attackable squares
 		if (attackOptionQuads != null) {
 			for (Quad q : attackOptionQuads) {
 				q.draw(program, mVPMatrix);
 			}
 		}
-    	
+		GLES20.glUniform1i(emissiveHandle, 0);
+
+		//Draw edge entities
 	    GLES20.glDisable(GLES20.GL_CULL_FACE);
 		//TODO do these need to be synchronized as well? What if something gets added from game thread?
 	    for (EdgeEntity e : dungeonManager.currentRoom.edgeEntities) {
 	    	e.draw(program, mVPMatrix);
 	    }
+
+		//Draw entities
+		GLES20.glUniform1i(normallessHandle, 1);
 	    for (Entity e : dungeonManager.currentRoom.entities) {
 	    	e.draw(program, mVPMatrix);
 	    }
+		GLES20.glUniform1i(normallessHandle, 0);
+
+		//Draw numerical damage displays
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		GLES20.glUniform1i(emissiveHandle, 1);
 		synchronized (dungeonManager.currentRoom.damageDisplays) {
 			long t = System.currentTimeMillis();
 			Iterator<DamageDisplay> iter = dungeonManager.currentRoom.damageDisplays.iterator();
@@ -127,6 +146,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		GLES20.glUniform1i(emissiveHandle, 0);
 	}
 
 	public void setFocus(Entity focus) {
