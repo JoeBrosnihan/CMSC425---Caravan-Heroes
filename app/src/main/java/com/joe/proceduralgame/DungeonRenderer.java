@@ -17,8 +17,10 @@ import com.joe.proceduralgame.TextureManager.NoFreeTextureUnitsExcpetion;
 
 public class DungeonRenderer implements GLSurfaceView.Renderer {
 
-	public static final float NEAR_PLANE = 1;
+	public static final float NEAR_Z = 1;
 	public static final float CAMERA_ANGLE = 60;
+	public static final float DEFAULT_FOV = 45;
+	public static final float DEFAULT_NEAR_HEIGHT = (float) Math.tan(Math.toRadians(DEFAULT_FOV / 2));
 	//The fraction of the distance to the focus covered in one second
 	public static final float FOCUS_CAM_SPEED = .90f, PANNING_CAM_SPEED = .99f;
 	
@@ -32,7 +34,6 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	private final float[] mVPMatrix = new float[16];
 	private final float[] mProjectionMatrix = new float[16];
 	final float[] mViewMatrix = new float[16];
-	private float fov = 45;
 	public float nearWidth, nearHeight;
 	float camx, camy = 8, camz;
 	float destx, destz;
@@ -267,14 +268,27 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		GLES20.glViewport(0, 0, width, height);
 		
 		float ratio = width / (float) height;
-		float h = (float) Math.tan(Math.toRadians(fov / 2));
 		
-		nearHeight = h * NEAR_PLANE * 2;
+		nearHeight = DEFAULT_NEAR_HEIGHT * NEAR_Z * 2;
 		nearWidth = ratio * nearHeight;
 		
 	    // this projection matrix is applied to object coordinates
 	    // in the onDrawFrame() method
-	    Matrix.frustumM(mProjectionMatrix, 0, -nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, NEAR_PLANE, 100);
+	    Matrix.frustumM(mProjectionMatrix, 0, -nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, NEAR_Z, 100);
+	}
+
+	/**
+	 * Zooms the camera by a given factor
+	 *
+	 * Scales the size of the near plane by zoomMultiplier and updates the projection matrix.
+	 *
+	 * @param zoomMultiplier the value by which to scale the near plane
+	 */
+	public void multiplyZoom(float zoomMultiplier) {
+		nearHeight *= zoomMultiplier;
+		nearWidth *= zoomMultiplier;
+
+		Matrix.frustumM(mProjectionMatrix, 0, -nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, NEAR_Z, 100);
 	}
 
 	@Override

@@ -5,8 +5,11 @@ import com.joe.proceduralgame.Quad.Type;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Controller {
 	public static final float MIN_DIST_TO_START_PANNING = .5f;
@@ -18,6 +21,8 @@ public class Controller {
 
 	/** The world {x, z} world coordinates of where the touch started */
 	private float[] touchAnchor = new float[2];
+	private float[] touchPos = new float[2];
+	private double pixelDist; //The current pixel distance between two touches when zooming
 	private boolean panning = false;
 
 	public Character selectedCharacter = null;
@@ -233,38 +238,79 @@ public class Controller {
 		}
 	}
 
-	private float[] touchPos = new float[2];
+	/**
+	 * Handles touch events
+	 *
+	 * @param e the MotionEvent to handle
+	 * @return true if the event was consumed
+	 */
 	public boolean onTouchEvent(MotionEvent e) {
-		float nearX = (e.getX() / view.getWidth() - .5f) * renderer.nearWidth;
-		float nearY = (-e.getY() / view.getHeight() + .5f) * renderer.nearHeight;
+		if (e.getActionMasked() == MotionEvent.ACTION_DOWN || e.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
+			if (e.getPointerCount() > 1) {
+				renderer.setFocus(null);
+				panning = true;
+				pixelDist = Math.hypot(e.getX(0) - e.getX(1), e.getY(0) - e.getY(1)); // this may produce weird behavior for > 2 touches because of hardcoded indices
+			}
 
-		if (e.getAction() == MotionEvent.ACTION_DOWN) {
-			RaycastUtils.projectOntoGround(touchAnchor, renderer.mViewMatrix, nearX, nearY);
-		} else if (e.getAction() == MotionEvent.ACTION_UP) {
-			if (panning)
-				panning = false;
-			else
-				onClick(e);
-		} else if (e.getAction() == MotionEvent.ACTION_MOVE) {
-			RaycastUtils.projectOntoGround(touchPos, renderer.mViewMatrix, nearX, nearY);
-			if (!panning) {
-				if (touchAnchor == null) {
-					touchAnchor = touchPos;
-				} else {
-					double dist = Math.hypot(touchPos[0] - touchAnchor[0], touchPos[1] - touchAnchor[1]);
-					if (dist >= MIN_DIST_TO_START_PANNING) {
-						renderer.setFocus(null);
-						panning = true;
-					}
+			float avgX = 0, avgY = 0;
+			for (int i = 0; i < e.getPointerCount(); i++) {
+				avgX += e.getX(i);
+				avgY += e.getY(i);
+			}
+			avgX /= e.getPointerCount();
+			avgY /= e.getPointerCount();
+			project(touchAnchor, avgX, avgY);
+
+		} else if (e.getActionMasked() == MotionEvent.ACTION_UP || e.getActionMasked() == MotionEvent.ACTION_POINTER_UP) {
+			int index = e.getActionIndex();
+
+			float avgX = 0, avgY = 0;
+			for (int i = 0; i < e.getPointerCount(); i++) {
+				if (i != index) {
+					avgX += e.getX(i);
+					avgY += e.getY(i);
 				}
 			}
+			avgX /= (e.getPointerCount() - 1);
+			avgY /= (e.getPointerCount() - 1);
+			project(touchAnchor, avgX, avgY);
+
+			if (e.getPointerCount() == 1) {
+				if (!panning)
+					onClick(e);
+				else
+					panning = false;
+			}
+		} else if (e.getActionMasked() == MotionEvent.ACTION_MOVE) {
+			if (!panning) {
+				project(touchPos, e.getX(), e.getY());
+				double dist = Math.hypot(touchPos[0] - touchAnchor[0], touchPos[1] - touchAnchor[1]);
+				if (dist >= MIN_DIST_TO_START_PANNING) {
+					renderer.setFocus(null);
+					panning = true;
+				}
+			}
+			if (e.getPointerCount() > 1) {
+				double dist = Math.hypot(e.getX(0) - e.getX(1), e.getY(0) - e.getY(1));
+				renderer.multiplyZoom((float) (pixelDist / dist));
+				pixelDist = dist;
+			}
 			if (panning) {
-				//Calculate vector that should be added to camera's position
+				float avgX = 0, avgY = 0;
+				for (int i = 0; i < e.getPointerCount(); i++) {
+					avgX += e.getX(i);
+					avgY += e.getY(i);
+				}
+				avgX /= e.getPointerCount();
+				avgY /= e.getPointerCount();
+				project(touchPos, avgX, avgY);
+
 				float dx = touchAnchor[0] - touchPos[0];
 				float dz = touchAnchor[1] - touchPos[1];
 				renderer.destx = renderer.camx + dx;
 				renderer.destz = renderer.camz + dz;
-				//Confine camera to current room
+
+				//confine camera to current room
 				final float left = manager.currentRoom.originx,
 						right = manager.currentRoom.originx + manager.currentRoom.width - 1,
 						near = manager.currentRoom.originz + manager.currentRoom.length - 1,
@@ -290,6 +336,19 @@ public class Controller {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Projects a set of on-screen pixel coordinates onto the ground
+	 *
+	 * @param result float[] to store the resulting {x, y}
+	 * @param x the on-screen x coordinate to project
+	 * @param y the on-screen y coordinate to project
+	 */
+	private final void project(float[] result, float x, float y) {
+		float nearX = (x / view.getWidth() - .5f) * renderer.nearWidth;
+		float nearY = (-y / view.getHeight() + .5f) * renderer.nearHeight;
+		RaycastUtils.projectOntoGround(result, renderer.mViewMatrix, nearX, nearY);
 	}
 
 	/**
