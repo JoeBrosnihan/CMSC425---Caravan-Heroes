@@ -124,7 +124,6 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 
 		//Draw edge entities
 	    GLES20.glDisable(GLES20.GL_CULL_FACE);
-		//TODO do these need to be synchronized as well? What if something gets added from game thread?
 	    for (EdgeEntity e : dungeonManager.currentRoom.edgeEntities) {
 	    	e.draw(program, mVPMatrix);
 	    }
@@ -139,27 +138,24 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		//Draw numerical damage displays
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		GLES20.glUniform1i(emissiveHandle, 1);
-		synchronized (dungeonManager.currentRoom.damageDisplays) {
-			long t = System.currentTimeMillis();
-			Iterator<DamageDisplay> iter = dungeonManager.currentRoom.damageDisplays.iterator();
-			while (iter.hasNext()) {
-				DamageDisplay display = iter.next();
-				if (t - display.creationTime >= DamageDisplay.LIFETIME)
-					iter.remove();
-				else
-					display.draw(program, mVPMatrix, uiTextureUnit);
-			}
+		long t = System.currentTimeMillis();
+		Iterator<DamageDisplay> iter = dungeonManager.currentRoom.damageDisplays.iterator();
+		while (iter.hasNext()) {
+			DamageDisplay display = iter.next();
+			if (t - display.creationTime >= DamageDisplay.LIFETIME)
+				iter.remove();
+			else
+				display.draw(program, mVPMatrix, uiTextureUnit);
 		}
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 		GLES20.glUniform1i(emissiveHandle, 0);
 	}
 
 	public void setFocus(Entity focus) {
-		synchronized (this) {
-			this.focus = focus;
-		}
+		this.focus = focus;
 	}
 
+	//Thread entry point
 	public void onDrawFrame(GL10 unused) {
 		long time = System.currentTimeMillis();
 		double dt = (time - lastDrawTime) / 1000.0;
@@ -193,8 +189,9 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	    catchGLError();
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 	    catchGLError();
-		
-		draw();
+		synchronized (dungeonManager) {
+			draw();
+		}
 	    catchGLError(); //TODO use these for testing, then clean up
 
 		lastDrawTime = time;
@@ -265,14 +262,12 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	private void updateCamera(double dt) {
 		float deltax, deltaz;
 		float factor;
-		synchronized (this) {
-			if (focus != null) {
-				factor = (float) Math.pow(1 - FOCUS_CAM_SPEED, dt);
-				destx = focus.posx;
-				destz = focus.posz;
-			} else {
-				factor = (float) Math.pow(1 - PANNING_CAM_SPEED, dt);
-			}
+		if (focus != null) {
+			factor = (float) Math.pow(1 - FOCUS_CAM_SPEED, dt);
+			destx = focus.posx;
+			destz = focus.posz;
+		} else {
+			factor = (float) Math.pow(1 - PANNING_CAM_SPEED, dt);
 		}
 		deltax = destx - camx;
 		deltaz = destz - camz;
@@ -297,18 +292,21 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		characterSelector.uvScale[1] = 1f / 8f;
 	}
 
+	//Thread entry point
 	@Override
 	public void onSurfaceChanged(GL10 unused, int width, int height) {
-		GLES20.glViewport(0, 0, width, height);
-		
-		float ratio = width / (float) height;
-		
-		nearHeight = DEFAULT_NEAR_HEIGHT * NEAR_Z * 2;
-		nearWidth = ratio * nearHeight;
-		
-	    // this projection matrix is applied to object coordinates
-	    // in the onDrawFrame() method
-	    Matrix.frustumM(mProjectionMatrix, 0, -nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, NEAR_Z, 100);
+		synchronized (dungeonManager) {
+			GLES20.glViewport(0, 0, width, height);
+
+			float ratio = width / (float) height;
+
+			nearHeight = DEFAULT_NEAR_HEIGHT * NEAR_Z * 2;
+			nearWidth = ratio * nearHeight;
+
+			// this projection matrix is applied to object coordinates
+			// in the onDrawFrame() method
+			Matrix.frustumM(mProjectionMatrix, 0, -nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, NEAR_Z, 100);
+		}
 	}
 
 	/**
@@ -325,51 +323,54 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		Matrix.frustumM(mProjectionMatrix, 0, -nearWidth / 2, nearWidth / 2, -nearHeight / 2, nearHeight / 2, NEAR_Z, 100);
 	}
 
+	//Thread entry point
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig arg1) {
-	    GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-	    catchGLError();
-	    GLES20.glClearDepthf(1.0f);
-	    catchGLError();
-	    GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-	    catchGLError();
-	    GLES20.glDepthMask(true);
-	    catchGLError();
-	    GLES20.glEnable(GLES20.GL_CULL_FACE);
-	    catchGLError();
-	    GLES20.glCullFace(GLES20.GL_BACK);
-	    catchGLError();
-	    GLES20.glEnable(GLES20.GL_BLEND);
-	    catchGLError();
-	    GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-	    catchGLError();
-	    
-		int vertShader = gameView.loadShader(GLES20.GL_VERTEX_SHADER, R.raw.vbasic);
-		int fragShader = gameView.loadShader(GLES20.GL_FRAGMENT_SHADER, R.raw.fbasic);
-		
-		program = GLES20.glCreateProgram();
-	    catchGLError();
-	    catchGLError();
-		GLES20.glAttachShader(program, vertShader);
-	    catchGLError();
-		GLES20.glAttachShader(program, fragShader);
-	    catchGLError();
-		GLES20.glLinkProgram(program);
-	    catchGLError();
+		synchronized (dungeonManager) {
+			GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+			catchGLError();
+			GLES20.glClearDepthf(1.0f);
+			catchGLError();
+			GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+			catchGLError();
+			GLES20.glDepthMask(true);
+			catchGLError();
+			GLES20.glEnable(GLES20.GL_CULL_FACE);
+			catchGLError();
+			GLES20.glCullFace(GLES20.GL_BACK);
+			catchGLError();
+			GLES20.glEnable(GLES20.GL_BLEND);
+			catchGLError();
+			GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			catchGLError();
 
-		GLES20.glClearColor(0, 0, 0, 1);
-	    catchGLError();
-		
-		try {
-			dungeonManager.currentRoom.load(textureManager);
-			load(textureManager);
-		    catchGLError();
-		} catch (NoFreeTextureUnitsExcpetion e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			int vertShader = gameView.loadShader(GLES20.GL_VERTEX_SHADER, R.raw.vbasic);
+			int fragShader = gameView.loadShader(GLES20.GL_FRAGMENT_SHADER, R.raw.fbasic);
+
+			program = GLES20.glCreateProgram();
+			catchGLError();
+			catchGLError();
+			GLES20.glAttachShader(program, vertShader);
+			catchGLError();
+			GLES20.glAttachShader(program, fragShader);
+			catchGLError();
+			GLES20.glLinkProgram(program);
+			catchGLError();
+
+			GLES20.glClearColor(0, 0, 0, 1);
+			catchGLError();
+
+			try {
+				dungeonManager.currentRoom.load(textureManager);
+				load(textureManager);
+				catchGLError();
+			} catch (NoFreeTextureUnitsExcpetion e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			lastDrawTime = System.currentTimeMillis();
 		}
-
-		lastDrawTime = System.currentTimeMillis();
 	}
 
 }

@@ -39,6 +39,7 @@ public class GUIManager {
 	public void showPhaseOverlay(final int group) {
 		final ViewGroup root = ((ViewGroup) activity.getWindow().getDecorView().getRootView());
 		root.getHandler().post(new Runnable() {
+			//Thread entry point
 			@Override
 			public void run() {
 				ImageView phaseOverlay = (ImageView) root.findViewById(R.id.phase_overlay);
@@ -60,6 +61,7 @@ public class GUIManager {
 	public void hidePhaseOverlay() {
 		final ViewGroup root = ((ViewGroup) activity.getWindow().getDecorView().getRootView());
 		root.getHandler().post(new Runnable() {
+			//Thread entry point
 			@Override
 			public void run() {
 				View phaseOverlay = root.findViewById(R.id.phase_overlay);
@@ -73,19 +75,22 @@ public class GUIManager {
 	 *
 	 * @param character the character to inspect
 	 */
-	public void showCharacterSummary(final Character character) {
+	public void showCharacterSummary(final DungeonManager manager, final Character character) {
 		final ViewGroup characterSummary = (ViewGroup) activity.findViewById(R.id.character_summary);
 
 		characterSummary.getHandler().post(new Runnable() {
+			//Thread entry point
 			@Override
 			public void run() {
-				characterSummary.setVisibility(View.VISIBLE);
-				ImageView characterIcon = (ImageView) characterSummary.findViewById(R.id.character_icon);
-				characterIcon.setImageResource(character.getIconID());
-				HealthBar healthBar = (HealthBar) characterSummary.findViewById(R.id.health_bar);
-				healthBar.showHealth(character.getHitPoints(), character.getMaxHitPoints());
-				TextView healthText = (TextView) characterSummary.findViewById(R.id.health_text);
-				healthText.setText(character.getHitPoints() + " / " + character.getMaxHitPoints());
+				synchronized (manager) {
+					characterSummary.setVisibility(View.VISIBLE);
+					ImageView characterIcon = (ImageView) characterSummary.findViewById(R.id.character_icon);
+					characterIcon.setImageResource(character.getIconID());
+					HealthBar healthBar = (HealthBar) characterSummary.findViewById(R.id.health_bar);
+					healthBar.showHealth(character.getHitPoints(), character.getMaxHitPoints());
+					TextView healthText = (TextView) characterSummary.findViewById(R.id.health_text);
+					healthText.setText(character.getHitPoints() + " / " + character.getMaxHitPoints());
+				}
 			}
 		});
 	}
@@ -98,6 +103,7 @@ public class GUIManager {
 
 		characterSummary.getHandler().post(new Runnable() {
 			@Override
+			//Thread entry point
 			public void run() {
 				characterSummary.setVisibility(View.GONE);
 			}
@@ -114,6 +120,7 @@ public class GUIManager {
 		final ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
 
 		actionList.getHandler().post(new Runnable() {
+			//Thread entry point
 			@Override
 			public void run() {
 				actionList.removeAllViews(); //clear children in case it
@@ -132,6 +139,7 @@ public class GUIManager {
 						} else if (visibilities[index] == Action.Visibility.SELECTABLE) {
 							entry.setOnClickListener(new View.OnClickListener() {
 								@Override
+								//Thread entry point
 								public void onClick(View v) {
 									selectAction(entry, actions[index]);
 								}
@@ -153,6 +161,7 @@ public class GUIManager {
 		final ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
 
 		actionList.getHandler().post(new Runnable() {
+			//Thread entry point
 			@Override
 			public void run() {
 				clearActionHighlights();
@@ -167,6 +176,7 @@ public class GUIManager {
 		final ViewGroup pane = (ViewGroup) activity.findViewById(R.id.action_list);
 		if (pane != null) {
 			pane.getHandler().post(new Runnable() {
+				//Thread entry point
 				@Override
 				public void run() {
 					pane.removeAllViews();
@@ -187,6 +197,7 @@ public class GUIManager {
 		}
 	}
 
+	//Thread entry point from click listener
 	/**
 	 * Called when an action is selected via click in the action pane
 	 *
@@ -217,6 +228,7 @@ public class GUIManager {
 		Handler handler = actionList.getHandler();
 		if (handler != null) {
 			handler.post(new Runnable() {
+				//Thread entry point
 				@Override
 				public void run() {
 					display.setText(String.valueOf(Math.round(fps)));

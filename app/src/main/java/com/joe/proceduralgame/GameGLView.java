@@ -38,15 +38,20 @@ public class GameGLView extends GLSurfaceView {
 		dungeonManager.start();
 	}
 
+	//Thread entry point
 	public boolean onTouchEvent(MotionEvent e) {
-		return gameController.onTouchEvent(e);
+		synchronized (dungeonManager) {
+			return gameController.onTouchEvent(e);
+		}
 	}
 
 	/**
 	 * Called when the user presses the back button.
 	 */
 	public void onBackPressed() {
-		gameController.onBackPressed();
+		synchronized (dungeonManager) {
+			gameController.onBackPressed();
+		}
 	}
 	
 	public int loadShader(int type, int resID) {

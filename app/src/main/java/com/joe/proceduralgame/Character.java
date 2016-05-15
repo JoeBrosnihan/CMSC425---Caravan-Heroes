@@ -89,10 +89,8 @@ public abstract class Character extends AttackableEntity {
 	@Override
 	public void setPosition(float x, float z) {
 		super.setPosition(x, z);
-		synchronized (this) {
-			if (graphicLoaded)
-				updateModelMatrix();
-		}
+		if (graphicLoaded)
+			updateModelMatrix();
 	}
 
 	/**
@@ -104,10 +102,8 @@ public abstract class Character extends AttackableEntity {
 	 */
 	public void setDirection(int newDir) {
 		dir = newDir;
-		synchronized (this) {
-			if (graphicLoaded)
-				updateModelMatrix();
-		}
+		if (graphicLoaded)
+			updateModelMatrix();
 	}
 	
 	public void updateModelMatrix() {

@@ -362,6 +362,7 @@ public class DungeonManager extends Thread {
 		return tranquil;
 	}
 
+	//Thread entry point
 	public void run() {
 		running = true;
 		long last = System.currentTimeMillis();
@@ -373,8 +374,10 @@ public class DungeonManager extends Thread {
 					Thread.sleep(waitMS - dt);
 				} catch (InterruptedException e) {}
 			}
-			last = System.currentTimeMillis();
-			update(waitMS * .001f);
+			synchronized (this) {
+				last = System.currentTimeMillis();
+				update(waitMS * .001f);
+			}
 
 			//display fps measure
 			guiManager.displayFPS(dungeonRenderer.fpsMeasure);

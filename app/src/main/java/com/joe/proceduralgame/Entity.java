@@ -27,10 +27,8 @@ public abstract class Entity {
 	}
 
 	public void graphicLoad(TextureManager tex) throws NoFreeTextureUnitsExcpetion {
-		synchronized (this) {
-			load(tex);
-			graphicLoaded = true;
-		}
+		load(tex);
+		graphicLoaded = true;
 	}
 
 	public Action getDefaultAction() {

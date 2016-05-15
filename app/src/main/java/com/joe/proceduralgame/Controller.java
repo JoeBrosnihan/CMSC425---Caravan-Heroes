@@ -54,13 +54,16 @@ public class Controller {
 		gui.hideCharacterSummary();
 	}
 
+	//Thread entry point from GUIManager
 	/**
 	 * Handles when the user purposefully deselects their selected action.
 	 */
 	public void deselectAction() {
-		selectedAction = null;
-		gui.deselectAction();
-		renderer.hideAttackOptions();
+		synchronized (manager) {
+			selectedAction = null;
+			gui.deselectAction();
+			renderer.hideAttackOptions();
+		}
 	}
 
 	/**
@@ -101,18 +104,21 @@ public class Controller {
 		}
 	}
 
+	//Thread entry point from GUIManager
 	/**
 	 * Called by the GUIManager when an action is selected from the gui
 	 * @param selectedAction the selected Action
 	 */
 	public void onActionSelected(Action selectedAction) {
-		this.selectedAction = selectedAction;
+		synchronized (manager) {
+			this.selectedAction = selectedAction;
 
-		if (selectedAction.singleTarget) {
-			if (selectedAction == Action.basicAttack) {
-				//TODO display range?
-				List<Entity> targets = selectedAction.getTargets(selectedCharacter);
-				renderer.showAttackOptions(targets);
+			if (selectedAction.singleTarget) {
+				if (selectedAction == Action.basicAttack) {
+					//TODO display range?
+					List<Entity> targets = selectedAction.getTargets(selectedCharacter);
+					renderer.showAttackOptions(targets);
+				}
 			}
 		}
 	}
@@ -178,7 +184,7 @@ public class Controller {
 						if (character.isPlayerOwned()) {
 							selectCharacter(character);
 							//TODO should all of the following be moved to within selectCharacter()?
-							gui.showCharacterSummary(character);
+							gui.showCharacterSummary(manager, character);
 							Action[] actions = character.getPossibleActions();
 							gui.showActionPane(actions, getActionVisibilities(character, actions));
 						}
@@ -194,7 +200,7 @@ public class Controller {
 							if (character.isPlayerOwned()) {
 								selectCharacter(character);
 								//TODO should all of the following be moved to within selectCharacter()?
-								gui.showCharacterSummary(character);
+								gui.showCharacterSummary(manager, character);
 								Action[] actions = character.getPossibleActions();
 								gui.showActionPane(actions, getActionVisibilities(character, actions));
 							}
@@ -365,13 +371,16 @@ public class Controller {
 		return visibilities;
 	}
 
+	//Thread entry point from GUIManager
 	/**
 	 * Gets the selected Action.
 	 *
 	 * @return the selectedAction
 	 */
 	public Action getSelectedAction() {
-		return selectedAction;
+		synchronized (manager) {
+			return selectedAction;
+		}
 	}
 
 }
