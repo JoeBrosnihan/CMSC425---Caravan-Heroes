@@ -3,6 +3,7 @@ package com.joe.proceduralgame;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -201,6 +202,26 @@ public class GUIManager {
 			clearActionHighlights();
 			actionEntry.setBackgroundColor(Color.rgb(220, 180, 0));
 			controller.onActionSelected(action);
+		}
+	}
+
+	/**
+	 * Displays the given fps measure on screen.
+	 *
+	 * @param fps the number to display
+	 */
+	public void displayFPS(final double fps) {
+		final ViewGroup actionList = (ViewGroup) activity.findViewById(R.id.action_list);
+		final TextView display = (TextView) activity.findViewById(R.id.fps_display);
+
+		Handler handler = actionList.getHandler();
+		if (handler != null) {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					display.setText(String.valueOf(Math.round(fps)));
+				}
+			});
 		}
 	}
 

@@ -375,6 +375,9 @@ public class DungeonManager extends Thread {
 			}
 			last = System.currentTimeMillis();
 			update(waitMS * .001f);
+
+			//display fps measure
+			guiManager.displayFPS(dungeonRenderer.fpsMeasure);
 		}
 	}
 

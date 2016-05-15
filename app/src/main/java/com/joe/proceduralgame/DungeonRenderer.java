@@ -23,6 +23,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	public static final float DEFAULT_NEAR_HEIGHT = (float) Math.tan(Math.toRadians(DEFAULT_FOV / 2));
 	//The fraction of the distance to the focus covered in one second
 	public static final float FOCUS_CAM_SPEED = .90f, PANNING_CAM_SPEED = .99f;
+	private static final int FPS_MEASURE_INTERVAL_MS = 1000;
 	
 	private GameGLView gameView;
 	private TextureManager textureManager;
@@ -38,7 +39,11 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	float camx, camy = 8, camz;
 	float destx, destz;
 	private Entity focus;
+
 	private long lastDrawTime;
+	public double fpsMeasure; //The current fps measured from this thread
+	private int frameCount; //The number of frames counted this measure
+	private long lastMeasure = 0; //The time when the last measure was taken
 	
 	private Quad characterSelector;
 	private int uiTextureUnit;
@@ -158,6 +163,15 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 	public void onDrawFrame(GL10 unused) {
 		long time = System.currentTimeMillis();
 		double dt = (time - lastDrawTime) / 1000.0;
+
+		//update fpsMeasure
+		if (time >= lastMeasure + FPS_MEASURE_INTERVAL_MS) {
+			fpsMeasure = frameCount * 1000.0 / FPS_MEASURE_INTERVAL_MS;
+			lastMeasure = time;
+			frameCount = 0;
+		}
+		frameCount++;
+
 		// Set the camera position (View matrix)
 		updateCamera(dt);
 	    
