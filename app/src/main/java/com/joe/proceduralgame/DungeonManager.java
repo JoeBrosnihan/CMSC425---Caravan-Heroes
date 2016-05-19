@@ -365,18 +365,22 @@ public class DungeonManager extends Thread {
 	//Thread entry point
 	public void run() {
 		running = true;
-		long last = System.currentTimeMillis();
+		long lastUpdateCall = System.currentTimeMillis();
 		while (running) {
-			long t = System.currentTimeMillis();
-			long dt = t - last;
+			long currentTime;
+			synchronized (this) {
+				currentTime = System.currentTimeMillis();
+				final long timeElapsed = currentTime - lastUpdateCall;
+				lastUpdateCall = currentTime;
+				update(timeElapsed * .001f);
+			}
+
+			currentTime = System.currentTimeMillis();
+			long dt = currentTime - lastUpdateCall;
 			if (dt < waitMS) {
 				try {
 					Thread.sleep(waitMS - dt);
 				} catch (InterruptedException e) {}
-			}
-			synchronized (this) {
-				last = System.currentTimeMillis();
-				update(waitMS * .001f);
 			}
 
 			//display fps measure
