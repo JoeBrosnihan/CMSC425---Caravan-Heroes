@@ -8,10 +8,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.util.Log;
 
 public final class TextureManager {
 
+	private static final int MIN_UNIT = 2;
 	public static final int MAX_COUNT = 30;
 	public final int[][] unitToName = new int[MAX_COUNT][1];
 	public Map<Integer, TextureEntry> idToUnit = new Hashtable<Integer, TextureEntry>();
@@ -31,58 +31,77 @@ public final class TextureManager {
 	public TextureManager(Context context) {
 		this.context = context;
 	}
-	
-	private int loadTexture(int textureID) throws NoFreeTextureUnitsExcpetion {
-		int unit_minus_1 = -1;
-		for (int i = 0; i < MAX_COUNT; i++) {
+
+	/**
+	 * Binds a bitmap to a texture unit
+	 *
+	 * @param targetUnit the texture unit to bind the bitmap to
+	 * @param bitmap the Bitmap to load with OpenGL
+	 */
+	private void setBitmap(int targetUnit, Bitmap bitmap){
+		if (unitToName[targetUnit][0] != 0)
+			GLES20.glDeleteTextures(1, unitToName[targetUnit], 0);
+
+		GLES20.glGenTextures(1, unitToName[targetUnit], 0);
+
+		GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + targetUnit);
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, unitToName[targetUnit][0]);
+
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+		GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+
+		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+		DungeonRenderer.catchGLError();
+	}
+
+	/**
+	 * Finds a texture unit not in use and binds the provided bitmap to it.
+	 *
+	 * @param bitmap the bitmap to load with OpenGL
+	 * @return the texture unit assigned to the bitmap
+	 * @throws NoFreeTextureUnitsExcpetion throw when there are no free texture units left
+	 */
+	public int loadBitmap(Bitmap bitmap) throws NoFreeTextureUnitsExcpetion {
+		int unit = -1;
+		for (int i = MIN_UNIT; i < MAX_COUNT; i++) {
 			if (unitToName[i][0] == 0) {
-				unit_minus_1 = i;
+				unit = i;
 				break;
 			}
 		}
-		if (unit_minus_1 == -1)
+		if (unit == -1)
 			throw new NoFreeTextureUnitsExcpetion();
-		
-//		TODO handle limited number of texture units.
-//		TODO remove texture unit debugging code
-//		int[] count = {-1};
-//		GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_IMAGE_UNITS, count, 0);
-//		String n = this.context.getResources().getResourceName(textureID);
-		GLES20.glGenTextures(1, unitToName[unit_minus_1], 0);
-		DungeonRenderer.catchGLError();
-		
-	    GLES20.glActiveTexture(GLES20.GL_TEXTURE1 + unit_minus_1);
-		DungeonRenderer.catchGLError();
-	    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, unitToName[unit_minus_1][0]);
-		DungeonRenderer.catchGLError();
+		setBitmap(unit, bitmap);
 
-	    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-		DungeonRenderer.catchGLError();
-	    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-		DungeonRenderer.catchGLError();
-//	    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
-//	    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT);
-		
+		return unit;
+	}
+
+	/**
+	 * Finds a texture unit not in use and binds bitmap of the provided resource to it.
+	 *
+	 * @param textureID the resource id of the image to load
+	 * @return the texture unit assigned to the bitmap
+	 * @throws NoFreeTextureUnitsExcpetion throw when there are no free texture units left
+	 */
+	private int loadTextureResource(int textureID) throws NoFreeTextureUnitsExcpetion {
 		Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), textureID);
-	    GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-		DungeonRenderer.catchGLError();
+		int unit = loadBitmap(bitmap);
 	    bitmap.recycle();
-		
-	    idToUnit.put(textureID, new TextureEntry(unit_minus_1 + 1, 1));
-	    
-		return unit_minus_1 + 1;
+
+	    idToUnit.put(textureID, new TextureEntry(unit, 1));
+		return unit;
 	}
 	
-	private void unloadTexture(int textureID) {
+	private void unloadTextureResource(int textureID) {
 	}
-	
+
 	public int referenceLoad(int textureID) throws NoFreeTextureUnitsExcpetion {
 		TextureEntry entry = idToUnit.get(textureID);
 		if (entry != null) {
 			entry.referenceCount++;
 			return entry.glTextureUnit;
 		} else {
-			return loadTexture(textureID);
+			return loadTextureResource(textureID);
 		}
 	}
 	
@@ -90,7 +109,7 @@ public final class TextureManager {
 		TextureEntry entry = idToUnit.get(textureID);
 		entry.referenceCount--;
 		if (entry.referenceCount == 0)
-			unloadTexture(textureID);
+			unloadTextureResource(textureID);
 	}
 	
 	/**
