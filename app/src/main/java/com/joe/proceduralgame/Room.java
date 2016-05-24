@@ -1,6 +1,5 @@
 package com.joe.proceduralgame;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -239,7 +238,7 @@ public class Room {
 		int lightmapHandle = GLES20.glGetUniformLocation(shaderProgram, "uLightmap");
 		GLES20.glUniform1i(lightmapHandle, TextureManager.LIGHTMAP_UNIT);
 		int lightmapScaleHandle = GLES20.glGetUniformLocation(shaderProgram, "uLightmapScale");
-		GLES20.glUniform1f(lightmapScaleHandle, lighting.mapColumnWidth);
+		GLES20.glUniform1f(lightmapScaleHandle, lighting.mapUVScale);
 		int lightmapUVHandle = GLES20.glGetUniformLocation(shaderProgram, "uLightmapUV");
 		
 		int iTex = 0;
@@ -259,7 +258,7 @@ public class Room {
 			// change quad lightmap uv
 			float lightmapU = TextureManager.atlasU(i, lighting.nMapColumns);
 			float lightmapV = TextureManager.atlasV(i, lighting.nMapColumns);
-			GLES20.glUniform2f(lightmapUVHandle, lightmapU, lightmapV);
+			GLES20.glUniform2f(lightmapUVHandle, lightmapU + lighting.mapUVOffset, lightmapV + lighting.mapUVOffset);
 
 			if (i == textureChangeIndex) {
 				// change texture

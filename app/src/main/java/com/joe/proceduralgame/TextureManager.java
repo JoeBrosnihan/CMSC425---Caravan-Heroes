@@ -88,7 +88,7 @@ public final class TextureManager {
 	private int loadTextureResource(int textureID) throws NoFreeTextureUnitsExcpetion {
 		Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), textureID);
 		int unit = loadBitmap(bitmap);
-	    bitmap.recycle();
+		bitmap.recycle();
 
 	    idToUnit.put(textureID, new TextureEntry(unit, 1));
 		return unit;
