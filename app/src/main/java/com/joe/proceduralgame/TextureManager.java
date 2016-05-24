@@ -11,8 +11,10 @@ import android.opengl.GLUtils;
 
 public final class TextureManager {
 
-	private static final int MIN_UNIT = 2;
+	private static final int MIN_UNIT = 2; //Units less than this are reserved
+	public static final int LIGHTMAP_UNIT = 1;
 	public static final int MAX_COUNT = 30;
+
 	public final int[][] unitToName = new int[MAX_COUNT][1];
 	public Map<Integer, TextureEntry> idToUnit = new Hashtable<Integer, TextureEntry>();
 	public Context context;
@@ -61,7 +63,7 @@ public final class TextureManager {
 	 * @return the texture unit assigned to the bitmap
 	 * @throws NoFreeTextureUnitsExcpetion throw when there are no free texture units left
 	 */
-	public int loadBitmap(Bitmap bitmap) throws NoFreeTextureUnitsExcpetion {
+	private int loadBitmap(Bitmap bitmap) throws NoFreeTextureUnitsExcpetion {
 		int unit = -1;
 		for (int i = MIN_UNIT; i < MAX_COUNT; i++) {
 			if (unitToName[i][0] == 0) {
@@ -110,6 +112,16 @@ public final class TextureManager {
 		entry.referenceCount--;
 		if (entry.referenceCount == 0)
 			unloadTextureResource(textureID);
+	}
+
+	/**
+	 * Loads a lightmap Bitmap with OpenGL
+	 * The bound texture unit will be LIGHTMAP_UNIT
+	 *
+	 * @param lightmap the Bitmap to load as the lightmap
+	 */
+	public void setLightmap(Bitmap lightmap) {
+		setBitmap(LIGHTMAP_UNIT, lightmap);
 	}
 	
 	/**

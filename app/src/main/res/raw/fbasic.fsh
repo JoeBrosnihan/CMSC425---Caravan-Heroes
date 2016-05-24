@@ -5,15 +5,21 @@ uniform sampler2D uTexture;
 uniform vec2 uvOrigin;
 uniform vec2 uvScale;
 
+uniform sampler2D uLightmap;
+uniform vec2 uLightmapUV;
+uniform float uLightmapScale;
+
 uniform vec4 uColorMultiplier;
 uniform bool uTextureless; //if true, render quad as if a white texture
 uniform bool uNormalless; //if true, assume ndot = .5
 uniform bool uEmissive; //if true, do not modify color with lighting
 
+/*
 #define maxLights 16
 uniform vec3 lightPos[maxLights];
 uniform vec3 lightColor[maxLights];
 uniform int nLights;
+*/
 
 varying vec3 pos;
 varying vec3 norm;
@@ -24,7 +30,12 @@ void main() {
     if (uEmissive) {
         totalLight = vec3(1.0f, 1.0f, 1.0f);
     } else {
-        totalLight = vec3(.35f, .35f, .35f); //ambient color
+        totalLight = vec3(.5f, .5f, .5f); //ambient color
+
+        vec3 incomingLight = texture2D(uLightmap, uLightmapUV + uv * uLightmapScale).xyz;
+        totalLight = totalLight + incomingLight;
+
+/*
         vec3 posToLight;
         float ndot;
         for (int i = 0; i < nLights; i++) {
@@ -40,6 +51,7 @@ void main() {
                 totalLight = totalLight + intensity * lightColor[i];
             }
         }
+*/
     }
 
     vec4 sample;

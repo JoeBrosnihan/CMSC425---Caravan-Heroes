@@ -148,8 +148,9 @@ public class RoomGenerator {
 		float[] origin = {0, 0, 0.05f, 1};
 		float[] lightPos = new float[4];
 		Matrix.multiplyMV(lightPos, 0, model, 0, origin, 0);
-		RoomLighting.Light light = room.lighting.createLight(lightPos[0], lightPos[1], lightPos[2], .7f, .7f, .5f);
-		room.lighting.addLight(light);
+
+//		RoomLighting.Light light = room.lighting.createLight(lightPos[0], lightPos[1], lightPos[2], .7f, .7f, .5f);
+//		room.lighting.addStaticLight(light);
 	}
 
 	private void addWallQuad(Room room, int row, int col, int dir, int texture) {

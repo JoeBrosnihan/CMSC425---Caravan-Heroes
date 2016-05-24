@@ -83,13 +83,9 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		int colorMultiplierHandle = GLES20.glGetUniformLocation(program, "uColorMultiplier");
 		GLES20.glUniform4f(colorMultiplierHandle, 1, 1, 1, 1); //draw all quads without color modification by default
 
-		//Update lighting
-		if (dungeonManager.currentRoom.lighting.needsUpdate())
-			dungeonManager.currentRoom.lighting.update(program);
-
 		//Draw static room geometry
 	    GLES20.glEnable(GLES20.GL_CULL_FACE);
-	    dungeonManager.currentRoom.draw(program, mVPMatrix, vertexBuffer);
+	    dungeonManager.currentRoom.draw(program, mVPMatrix);
     	catchGLError();
 
 		//Draw box around selected Character

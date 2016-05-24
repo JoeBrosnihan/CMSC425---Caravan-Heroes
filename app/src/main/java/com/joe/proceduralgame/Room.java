@@ -127,7 +127,7 @@ public class Room {
 	}
 	
 	public void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion { //TODO unload rooms
-		lighting = new RoomLighting();
+		lighting = new RoomLighting(this);
 		generator.load(this);
 		DungeonRenderer.catchGLError();
 		loadStaticGeometry(tex);
@@ -140,6 +140,7 @@ public class Room {
 			e.load(tex);
 			DungeonRenderer.catchGLError();
 		}
+		lighting.load(tex);
 		return;
 	}
 	
@@ -225,18 +226,21 @@ public class Room {
 
 	/**
 	 * Draws only the static geometry of the room. No Entities.
-	 * @param shaderProgram
-	 * @param mVPMatrix
-	 * @param vertexBuffer
+	 * @param shaderProgram the OpenGL name of the shader to use
+	 * @param mVPMatrix the view projection matrix to use
 	 */
-	public void draw(int shaderProgram, float[] mVPMatrix, FloatBuffer vertexBuffer) {
-		int positionHandle = GLES20.glGetAttribLocation(shaderProgram, "vPosition");
-		int texCoordsHandle = GLES20.glGetAttribLocation(shaderProgram, "vTexCoords");
+	public void draw(int shaderProgram, float[] mVPMatrix) {
 		int modelHandle = GLES20.glGetUniformLocation(shaderProgram, "modelMatrix");
 		int mvpHandle = GLES20.glGetUniformLocation(shaderProgram, "MVP");
 		int textureHandle = GLES20.glGetUniformLocation(shaderProgram, "uTexture");
 		int originHandle = GLES20.glGetUniformLocation(shaderProgram, "uvOrigin");
 		int scaleHandle = GLES20.glGetUniformLocation(shaderProgram, "uvScale");
+
+		int lightmapHandle = GLES20.glGetUniformLocation(shaderProgram, "uLightmap");
+		GLES20.glUniform1i(lightmapHandle, TextureManager.LIGHTMAP_UNIT);
+		int lightmapScaleHandle = GLES20.glGetUniformLocation(shaderProgram, "uLightmapScale");
+		GLES20.glUniform1f(lightmapScaleHandle, lighting.mapColumnWidth);
+		int lightmapUVHandle = GLES20.glGetUniformLocation(shaderProgram, "uLightmapUV");
 		
 		int iTex = 0;
 		int iUV = 0;
@@ -246,12 +250,17 @@ public class Room {
 		float[] mvp = new float[16];
 		for (int i = 0; i < quadModels.length; i++) {
 			Quad.enableArrays(shaderProgram);
-			
+
 			// change quad model matrix
 			Matrix.multiplyMM(mvp, 0, mVPMatrix, 0, quadModels[i], 0);
 			GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvp, 0);
 			GLES20.glUniformMatrix4fv(modelHandle, 1, false, quadModels[i], 0);
-			
+
+			// change quad lightmap uv
+			float lightmapU = TextureManager.atlasU(i, lighting.nMapColumns);
+			float lightmapV = TextureManager.atlasV(i, lighting.nMapColumns);
+			GLES20.glUniform2f(lightmapUVHandle, lightmapU, lightmapV);
+
 			if (i == textureChangeIndex) {
 				// change texture
 				GLES20.glUniform1i(textureHandle, textures[iTex]);

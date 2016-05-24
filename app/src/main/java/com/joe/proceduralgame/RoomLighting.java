@@ -1,85 +1,45 @@
 package com.joe.proceduralgame;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.opengl.GLES20;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Admin on 4/27/2016.
- */
 public class RoomLighting {
 
-	public static int MAX_LIGHTS = 16;
-
-	private List<Light> lights = new ArrayList<>();
-	private boolean needsUpdate = false;
-
-	public class Light {
-		private float x, y, z, r, g, b;
-	}
+	private final Room room;
+	private Bitmap lightMap;
+	private int mapSize;
+	public int nMapColumns; //The number of columns (and rows) in the lightmap
+	public float mapColumnWidth;
 
 	/**
-	 * Adds a light to the room's lighting.
+	 * Creates a lighting system for a gen room
 	 *
-	 * @param light the light to add
+	 * @param room the room to be lit
 	 */
-	public void addLight(Light light) {
-		lights.add(light);
-		needsUpdate = true;
+	public RoomLighting(Room room) {
+		this.room = room;
 	}
 
-	/**
-	 * Checks if the GL uniforms need to be updated to match changes in lighting
-	 *
-	 * @return true if lighting has changed since last update
-	 */
-	public boolean needsUpdate() {
-		return needsUpdate;
-	}
+	public void load(TextureManager tex) {
+		mapSize = 128;
+		lightMap = Bitmap.createBitmap(mapSize, mapSize, Bitmap.Config.RGB_565);
 
-	/**
-	 * Updates the GL uniforms to match the current lighting.
-	 *
-	 * @param program the GL handle for the active shader program
-	 */
-	public void update(int program) {
-		//TODO this only supports adding new static lights at the moment
-		int visibleLights = Math.min(lights.size(), MAX_LIGHTS);
+		nMapColumns = (int) Math.round(Math.ceil(Math.sqrt(room.staticQuads.size())));
+		mapColumnWidth = 1 / (float) nMapColumns;
 
-		int lightPosHandle = GLES20.glGetUniformLocation(program, "lightPos");
-		int lightColorHandle = GLES20.glGetUniformLocation(program, "lightColor");
-		int nLightsHandle = GLES20.glGetUniformLocation(program, "nLights");
-		GLES20.glUniform1i(nLightsHandle, visibleLights);
+		lightMap.eraseColor(Color.BLACK);
 
-		for (int i = 0; i < visibleLights; i++) {
-			Light light = lights.get(i);
-			GLES20.glUniform3f(lightPosHandle + i, light.x, light.y, light.z);
-			GLES20.glUniform3f(lightColorHandle + i, light.r, light.g, light.b);
+		for (int r = 0; r < mapSize; r++) {
+			for (int c = r; c < mapSize; c++) {
+				lightMap.setPixel(r, c, Color.rgb(200, 180, 150));
+			}
 		}
-		needsUpdate = false;
-	}
 
-	/**
-	 * Creates a new light
-	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param r
-	 * @param g
-	 * @param b
-	 * @return the created light
-	 */
-	public Light createLight(float x, float y, float z, float r, float g, float b) {
-		Light light = new Light();
-		light.x = x;
-		light.y = y;
-		light.z = z;
-		light.r = r;
-		light.g = g;
-		light.b = b;
-		return light;
+		tex.setLightmap(lightMap);
 	}
 
 }
