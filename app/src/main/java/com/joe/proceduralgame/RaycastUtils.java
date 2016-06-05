@@ -91,10 +91,9 @@ public class RaycastUtils {
 
 		float[] originAndAim = {startX, startY, startZ, 1, aimX, aimY, aimZ, 1};
 
-		for (Quad q : room.staticQuads) {
-			if (q.type == Type.DECORATION)
-				continue;
-			Matrix.invertM(inverseModel, 0, q.modelMatrix, 0);
+		float[][] quadModels = room.quadModels;
+		for (int i = 0; i < quadModels.length; i++) {
+			Matrix.invertM(inverseModel, 0, quadModels[i], 0);
 
 			Matrix.multiplyMV(transformedVecs, 0, inverseModel, 0, originAndAim, 0);
 			Matrix.multiplyMV(transformedVecs, 4, inverseModel, 0, originAndAim, 4);
@@ -113,15 +112,15 @@ public class RaycastUtils {
 				float projectedX = transformedVecs[0] + dx * t;
 				float projectedY = transformedVecs[1] + dy * t;
 				if (-.5f <= projectedX && projectedX < .5f && -.5f <= projectedY && projectedY < .5f) {
+					Quad intersectedQuad = room.staticQuads.get(i);
+					if (intersectedQuad.type == Type.DECORATION)
+						continue;
+
 					if (resultIntersection != null) {
 						resultIntersection[0] = projectedX;
 						resultIntersection[1] = projectedY;
 					}
-//					float[] intersection = {projectedX, projectedY, 0, 1};
-//					float[] worldCoords = new float[4];
-//					Matrix.multiplyMV(worldCoords, 0, q.modelMatrix, 0, intersection, 0);
-
-					return q;
+					return intersectedQuad;
 				}
 			}
 		}

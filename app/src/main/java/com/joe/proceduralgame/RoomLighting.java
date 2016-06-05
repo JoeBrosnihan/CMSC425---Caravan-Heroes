@@ -1,5 +1,6 @@
 package com.joe.proceduralgame;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.opengl.Matrix;
@@ -18,6 +19,7 @@ public class RoomLighting {
 	public int nMapColumns; //The number of columns (and rows) in the lightmap
 	public float mapUVScale;
 	public float mapUVOffset;
+	private int nTasksRemaining;
 
 	public static abstract class StaticLightBody {
 		/**
@@ -62,8 +64,8 @@ public class RoomLighting {
 		this.room = room;
 	}
 
-	private final float[] sample = new float[6];
 	private int computeIllumination(float[] position, float[] normal) {
+		final float[] sample = new float[6];
 		float r = 0;
 		float g = 0;
 		float b = 0;
@@ -101,33 +103,70 @@ public class RoomLighting {
 	}
 
 	private void computeLightmap() {
-		final float[] normal = {0, 0, -1, 0};
-		final float[] translatedNormal = new float[4];
-		final float[] uvLocalPosition = new float[4];
-		uvLocalPosition[2] = 0;
-		uvLocalPosition[3] = 1;
-		final float[] position = new float[4];
 
 		final float divByTileSize = 1.0f / mapTileSize;
 
-		for (int i = 0; i < room.staticQuads.size(); i++) {
-			Quad quad = room.staticQuads.get(i);
-			Matrix.multiplyMV(translatedNormal, 0, quad.modelMatrix, 0, normal, 0);
+		final int nThreads = 1; //number of threads to distribute task on (at least 1)
+		final Thread masterThread = Thread.currentThread();
+		nTasksRemaining = nThreads;
 
-			final int minX = mapSize / nMapColumns * (i % nMapColumns);
-			final int minY = mapSize / nMapColumns * (i / nMapColumns);
-			for (int pixelU = 0; pixelU < mapTileSize; pixelU++) {
-				for (int pixelV = 0; pixelV < mapTileSize; pixelV++) {
-					uvLocalPosition[0] = pixelU * divByTileSize - .5f;
-					uvLocalPosition[1] = .5f - pixelV * divByTileSize;
-					Matrix.multiplyMV(position, 0, quad.modelMatrix, 0, uvLocalPosition, 0);
+		for (int t = 0; t < nThreads; t++) {
+			final int threadNum = t;
+			new Thread() {
+				public void run() {
+					final float[] normal = {0, 0, -1, 0};
+					final float[] translatedNormal = new float[4];
+					final float[] uvLocalPosition = new float[4];
+					final float[] position = new float[4];
+					uvLocalPosition[2] = 0;
+					uvLocalPosition[3] = 1;
+					for (int i = threadNum; i < room.staticQuads.size(); i += nThreads) { //distribute quads accross threads
+						Quad quad = room.staticQuads.get(i);
+						Matrix.multiplyMV(translatedNormal, 0, quad.modelMatrix, 0, normal, 0);
 
-					int illuminationColor = computeIllumination(position, translatedNormal);
-					lightMap.setPixel(minX + pixelU, minY + pixelV, illuminationColor);
-					//System.out.println("Computed Lightmap for U=" + pixelU + " V=" + pixelV + " for Quad i=" + i);
+						final int minX = mapSize / nMapColumns * (i % nMapColumns);
+						final int minY = mapSize / nMapColumns * (i / nMapColumns);
+						for (int pixelU = 0; pixelU < mapTileSize; pixelU++) {
+							for (int pixelV = 0; pixelV < mapTileSize; pixelV++) {
+								uvLocalPosition[0] = pixelU * divByTileSize - .5f;
+								uvLocalPosition[1] = .5f - pixelV * divByTileSize;
+								Matrix.multiplyMV(position, 0, quad.modelMatrix, 0, uvLocalPosition, 0);
+
+								int illuminationColor = computeIllumination(position, translatedNormal);
+
+								synchronized (masterThread) {
+									lightMap.setPixel(minX + pixelU, minY + pixelV, illuminationColor);
+								}
+//								System.out.println("Computed Lightmap for U=" + pixelU + " V=" + pixelV + " for Quad i=" + i + " on Thread " + threadNum);
+							}
+						}
+					}
+					synchronized (masterThread) {
+//						System.out.println("Thread " + threadNum + " acquired master thread Lock");
+						nTasksRemaining--;
+						masterThread.notify();
+					}
 				}
+			}.start();
+		}
+
+		synchronized (masterThread) {
+			while (nTasksRemaining > 0) {
+				try {
+					masterThread.wait();
+				} catch (InterruptedException e) {}
 			}
 		}
+//		while (true) {
+//			synchronized (masterThread) {
+//				if (nTasksRemaining == 0)
+//					break;
+//				}
+//			}
+//			try {
+//				masterThread.wait();
+//			} catch (InterruptedException e) {
+//		}
 	}
 
 	/**
@@ -158,7 +197,7 @@ public class RoomLighting {
 //	}
 
 	public void load(TextureManager tex) {
-		mapSize = 64;
+		mapSize = 64; //must be a power of 2 (32, 64, 128, etc.)
 		lightMap = Bitmap.createBitmap(mapSize, mapSize, Bitmap.Config.RGB_565);
 
 		nMapColumns = (int) Math.round(Math.pow(2, Math.ceil(Math.log10(room.staticQuads.size()) * Math.log(10) / Math.log(4))));

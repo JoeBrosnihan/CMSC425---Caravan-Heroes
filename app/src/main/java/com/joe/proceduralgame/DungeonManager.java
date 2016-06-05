@@ -51,7 +51,8 @@ public class DungeonManager extends Thread {
 	 * Load the skeleton of the dungeon.
 	 */
 	public void initialize() {
-		RoomGenerator gen = new RoomGenerator(17);
+//		RoomGenerator gen = new RoomGenerator(17);
+		RoomGenerator gen = new RoomGenerator(1);
 		currentRoom = new Room();
 		currentRoom.generator = gen;
 		gen.generate(currentRoom);

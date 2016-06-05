@@ -202,7 +202,9 @@ public class Room {
 		for (int i = 0; i < staticQuads.size(); i++) {
 			Quad q = staticQuads.get(i);
 			// copy model matrix
-			quadModels[i] = q.modelMatrix;
+			for (int e = 0; e < 16; e++) {
+				quadModels[i][e] = q.modelMatrix[e];
+			}
 			
 			if (q.textureID != currentTextureID) {
 				iTex++;

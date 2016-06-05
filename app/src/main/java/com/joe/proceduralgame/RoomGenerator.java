@@ -149,7 +149,7 @@ public class RoomGenerator {
 		float[] lightPos = new float[4];
 		Matrix.multiplyMV(lightPos, 0, model, 0, origin, 0);
 
-		RoomLighting.StaticLightBody light = new RoomLighting.LightSphere(lightPos[0], lightPos[1], lightPos[2], .1f, .7f, .7f, .5f);
+		RoomLighting.StaticLightBody light = new RoomLighting.LightSphere(lightPos[0], lightPos[1], lightPos[2], .1f, .8f, .7f, .5f);
 		room.lighting.addStaticLight(light);
 	}
 
