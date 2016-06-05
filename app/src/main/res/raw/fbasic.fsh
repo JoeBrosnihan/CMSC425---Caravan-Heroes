@@ -30,7 +30,7 @@ void main() {
     if (uEmissive) {
         totalLight = vec3(1.0f, 1.0f, 1.0f);
     } else {
-        totalLight = vec3(.5f, .5f, .5f); //ambient color
+        totalLight = vec3(.2f, .2f, .2f); //ambient color
 
         vec3 incomingLight = texture2D(uLightmap, uLightmapUV + uv * uLightmapScale).xyz;
         totalLight = totalLight + incomingLight;
