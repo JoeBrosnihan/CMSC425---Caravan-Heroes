@@ -38,7 +38,7 @@ public class RaycastUtils {
 	 * @param nearX the x intersection of the ray with the plane z = -1 in camera space
 	 * @param nearY the y intersection of the ray with the plane z = -1 in camera space
 	 */
-	public static void projectOntoGround(float[] result, float[] viewMatrix, float nearX, float nearY) {
+	public static final void projectOntoGround(float[] result, float[] viewMatrix, float nearX, float nearY) {
 		float[] inverseView = new float[16];
 		Matrix.invertM(inverseView, 0, viewMatrix, 0);
 		float[] eyeAndVec = {0, 0, 0, 1, nearX, nearY, -1, 1};
@@ -63,16 +63,80 @@ public class RaycastUtils {
 		}
 	}
 
-	public static Quad pick(Room room, float[] viewMatrix, float nearX, float nearY) {
+	/**
+	 * Finds a quad intersected by the ray from a start point through an aim point
+	 *
+	 * If a float array of length at least 2 is supplied for result Intersection and if an
+	 * intersection is found, the X and Y coordinates of the intersection in the quad's coordinate
+	 * frame will be stored at index 0 and 1 respectively. The worldspace coordinates of the
+	 * intersection can be retrieved by multiplying the intersected quad's model matrix by the
+	 * float[4] vector, {resultIntersection[0], resultIntersection[1], 0, 1}.
+	 *
+	 * @param resultIntersection an optional float[2] or null to store the quadspace coordinates of an intersection
+	 * @param room the Room whose Quads to search
+	 * @param startX the x coordinate of the origin of the ray
+	 * @param startY the Y coordinate of the origin of the ray
+	 * @param startZ the Z coordinate of the origin of the ray
+	 * @param aimX the x coordinate of a point that the ray will pass through
+	 * @param aimY the y coordinate of a point that the ray will pass through
+	 * @param aimZ the z coordinate of a point that the ray will pass through
+	 * @param betweenPointsOnly if true the raycast will ignore quads not in between the start and aim
+	 * @return the closest Quad to the startPoint that is intersected by the ray
+	 */
+	public static final Quad raycast(float[] resultIntersection, Room room, float startX,
+	                                 float startY, float startZ, float aimX, float aimY, float aimZ,
+	                                 boolean betweenPointsOnly) {
+		float[] inverseModel = new float[16]; //transform from world space to quad space
+		float[] transformedVecs = new float[8];
+
+		float[] originAndAim = {startX, startY, startZ, 1, aimX, aimY, aimZ, 1};
+
+		for (Quad q : room.staticQuads) {
+			if (q.type == Type.DECORATION)
+				continue;
+			Matrix.invertM(inverseModel, 0, q.modelMatrix, 0);
+
+			Matrix.multiplyMV(transformedVecs, 0, inverseModel, 0, originAndAim, 0);
+			Matrix.multiplyMV(transformedVecs, 4, inverseModel, 0, originAndAim, 4);
+
+			if (betweenPointsOnly) {
+				//start and stop must be on different sides of the quad's plane
+				if (Math.signum(transformedVecs[6]) == Math.signum(transformedVecs[2]))
+					continue;
+			}
+
+			float dz = transformedVecs[6] - transformedVecs[2];
+			if (dz != 0) {
+				float t = -transformedVecs[2] / dz;
+				float dx = transformedVecs[4] - transformedVecs[0];
+				float dy = transformedVecs[5] - transformedVecs[1];
+				float projectedX = transformedVecs[0] + dx * t;
+				float projectedY = transformedVecs[1] + dy * t;
+				if (-.5f <= projectedX && projectedX < .5f && -.5f <= projectedY && projectedY < .5f) {
+					if (resultIntersection != null) {
+						resultIntersection[0] = projectedX;
+						resultIntersection[1] = projectedY;
+					}
+//					float[] intersection = {projectedX, projectedY, 0, 1};
+//					float[] worldCoords = new float[4];
+//					Matrix.multiplyMV(worldCoords, 0, q.modelMatrix, 0, intersection, 0);
+
+					return q;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static final Quad pick(Room room, float[] viewMatrix, float nearX, float nearY) {
 		float[] inverseModel = new float[16];
 		float[] composed = new float[16];
 		float[] transformedVecs = new float[8];
-		
+
 		float[] inverseView = new float[16];
 		Matrix.invertM(inverseView, 0, viewMatrix, 0);
 		float[] eyeAndVec = {0, 0, 0, 1, nearX, nearY, -1, 1};
 
-		//TODO how to pick a non-character entity?
 		for (Character c : room.characters) {
 			Quad q = c.quad;
 			Matrix.invertM(inverseModel, 0, q.modelMatrix, 0);
@@ -80,7 +144,7 @@ public class RaycastUtils {
 
 			Matrix.multiplyMV(transformedVecs, 0, composed, 0, eyeAndVec, 0);
 			Matrix.multiplyMV(transformedVecs, 4, composed, 0, eyeAndVec, 4);
-			
+
 			float dz = transformedVecs[6] - transformedVecs[2];
 			if (dz != 0) {
 				float t = -transformedVecs[2] / dz;
@@ -92,7 +156,7 @@ public class RaycastUtils {
 					float[] intersection = {projectedX, projectedY, 0, 1};
 					float[] worldCoords = new float[4];
 					Matrix.multiplyMV(worldCoords, 0, q.modelMatrix, 0, intersection, 0);
-					
+
 					return q;
 				}
 			}
@@ -105,7 +169,7 @@ public class RaycastUtils {
 
 			Matrix.multiplyMV(transformedVecs, 0, composed, 0, eyeAndVec, 0);
 			Matrix.multiplyMV(transformedVecs, 4, composed, 0, eyeAndVec, 4);
-			
+
 			float dz = transformedVecs[6] - transformedVecs[2];
 			if (dz != 0) {
 				float t = -transformedVecs[2] / dz;
@@ -117,7 +181,7 @@ public class RaycastUtils {
 					float[] intersection = {projectedX, projectedY, 0, 1};
 					float[] worldCoords = new float[4];
 					Matrix.multiplyMV(worldCoords, 0, q.modelMatrix, 0, intersection, 0);
-					
+
 					return q;
 				}
 			}

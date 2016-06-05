@@ -70,6 +70,15 @@ public class RoomLighting {
 		for (StaticLightBody light : lights) {
 			light.sample(sample);
 
+			float raycastBias = .05f;
+			float pointX = position[0] + normal[0] * raycastBias;
+			float pointY = position[1] + normal[1] * raycastBias;
+			float pointZ = position[2] + normal[2] * raycastBias;
+			boolean receivingLight = null == RaycastUtils.raycast(null, room, pointX, pointY,
+					pointZ, sample[0], sample[1], sample[2], true);
+			if (!receivingLight)
+				continue;
+
 			float posToLightX = sample[0] - position[0];
 			float posToLightY = sample[1] - position[1];
 			float posToLightZ = sample[2] - position[2];
@@ -95,6 +104,8 @@ public class RoomLighting {
 		final float[] normal = {0, 0, -1, 0};
 		final float[] translatedNormal = new float[4];
 		final float[] uvLocalPosition = new float[4];
+		uvLocalPosition[2] = 0;
+		uvLocalPosition[3] = 1;
 		final float[] position = new float[4];
 
 		final float divByTileSize = 1.0f / mapTileSize;
@@ -109,12 +120,11 @@ public class RoomLighting {
 				for (int pixelV = 0; pixelV < mapTileSize; pixelV++) {
 					uvLocalPosition[0] = pixelU * divByTileSize - .5f;
 					uvLocalPosition[1] = .5f - pixelV * divByTileSize;
-					uvLocalPosition[2] = 0;
-					uvLocalPosition[3] = 1;
 					Matrix.multiplyMV(position, 0, quad.modelMatrix, 0, uvLocalPosition, 0);
 
 					int illuminationColor = computeIllumination(position, translatedNormal);
 					lightMap.setPixel(minX + pixelU, minY + pixelV, illuminationColor);
+					//System.out.println("Computed Lightmap for U=" + pixelU + " V=" + pixelV + " for Quad i=" + i);
 				}
 			}
 		}
@@ -148,7 +158,7 @@ public class RoomLighting {
 //	}
 
 	public void load(TextureManager tex) {
-		mapSize = 256;
+		mapSize = 64;
 		lightMap = Bitmap.createBitmap(mapSize, mapSize, Bitmap.Config.RGB_565);
 
 		nMapColumns = (int) Math.round(Math.pow(2, Math.ceil(Math.log10(room.staticQuads.size()) * Math.log(10) / Math.log(4))));
