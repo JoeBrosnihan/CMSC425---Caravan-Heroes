@@ -52,7 +52,7 @@ public class DungeonManager extends Thread {
 	 */
 	public void initialize() {
 //		RoomGenerator gen = new RoomGenerator(17);
-		RoomGenerator gen = new RoomGenerator(1);
+		RoomGenerator gen = new RoomGenerator(0);
 		currentRoom = new Room();
 		currentRoom.generator = gen;
 		gen.generate(currentRoom);

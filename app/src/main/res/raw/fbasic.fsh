@@ -30,10 +30,10 @@ void main() {
     if (uEmissive) {
         totalLight = vec3(1.0f, 1.0f, 1.0f);
     } else {
-        totalLight = vec3(.2f, .2f, .2f); //ambient color
+        totalLight = vec3(0.0f, 0.0f, 0.0f); //ambient color
 
         vec3 incomingLight = texture2D(uLightmap, uLightmapUV + uv * uLightmapScale).xyz;
-        totalLight = totalLight + incomingLight;
+        totalLight = totalLight + incomingLight * incomingLight;
 
 /*
         vec3 posToLight;
@@ -63,5 +63,9 @@ void main() {
     sample *= uColorMultiplier;
 	if (sample.w < .1)
 		discard;
-	gl_FragColor = vec4(totalLight * sample.xyz, sample.w);
+
+	vec3 rawColor = totalLight * sample.xyz;
+	vec3 correctedColor = rawColor;
+
+	gl_FragColor = vec4(correctedColor, sample.w);
 }

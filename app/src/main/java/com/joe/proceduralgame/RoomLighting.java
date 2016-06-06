@@ -99,6 +99,12 @@ public class RoomLighting {
 		r = Math.min(Math.max(r, 0), 1);
 		g = Math.min(Math.max(g, 0), 1);
 		b = Math.min(Math.max(b, 0), 1);
+
+		//Encode
+		r = (float) Math.sqrt(r);
+		g = (float) Math.sqrt(g);
+		b = (float) Math.sqrt(b);
+
 		return Color.rgb((int) (255.0f * r), (int) (255.0f * g), (int) (255.0f * b));
 	}
 
