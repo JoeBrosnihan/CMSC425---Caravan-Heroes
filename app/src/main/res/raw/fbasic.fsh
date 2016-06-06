@@ -65,7 +65,7 @@ void main() {
 		discard;
 
 	vec3 rawColor = totalLight * sample.xyz;
-	vec3 correctedColor = rawColor;
+	vec3 correctedColor = rawColor * (vec3(2.0f, 2.0f, 2.0f) - rawColor);
 
 	gl_FragColor = vec4(correctedColor, sample.w);
 }
