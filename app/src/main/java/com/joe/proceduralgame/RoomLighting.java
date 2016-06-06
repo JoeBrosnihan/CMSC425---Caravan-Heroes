@@ -64,7 +64,7 @@ public class RoomLighting {
 		this.room = room;
 	}
 
-	private int computeIllumination(float[] position, float[] normal) {
+	private int computeIllumination(RaycastDatastructure datastructure, float[] position, float[] normal) {
 		final float[] sample = new float[6];
 		float r = 0;
 		float g = 0;
@@ -76,8 +76,8 @@ public class RoomLighting {
 			float pointX = position[0] + normal[0] * raycastBias;
 			float pointY = position[1] + normal[1] * raycastBias;
 			float pointZ = position[2] + normal[2] * raycastBias;
-			boolean receivingLight = null == RaycastUtils.raycast(null, room, pointX, pointY,
-					pointZ, sample[0], sample[1], sample[2], true);
+			boolean receivingLight = null == RaycastUtils.raycast(null, room, datastructure, pointX,
+					pointY,	pointZ, sample[0], sample[1], sample[2], true);
 			if (!receivingLight)
 				continue;
 
@@ -109,12 +109,17 @@ public class RoomLighting {
 	}
 
 	private void computeLightmap() {
-
 		final float divByTileSize = 1.0f / mapTileSize;
 
 		final int nThreads = 1; //number of threads to distribute task on (at least 1)
 		final Thread masterThread = Thread.currentThread();
 		nTasksRemaining = nThreads;
+
+		final RaycastDatastructure datastructure = new RaycastDatastructure(room);
+		for (Quad q : room.staticQuads) {
+			if (q.type != Quad.Type.DECORATION)
+				datastructure.add(q);
+		}
 
 		for (int t = 0; t < nThreads; t++) {
 			final int threadNum = t;
@@ -138,7 +143,8 @@ public class RoomLighting {
 								uvLocalPosition[1] = .5f - pixelV * divByTileSize;
 								Matrix.multiplyMV(position, 0, quad.modelMatrix, 0, uvLocalPosition, 0);
 
-								int illuminationColor = computeIllumination(position, translatedNormal);
+								int illuminationColor = computeIllumination(datastructure, position,
+										translatedNormal);
 
 								synchronized (masterThread) {
 									lightMap.setPixel(minX + pixelU, minY + pixelV, illuminationColor);
@@ -203,7 +209,7 @@ public class RoomLighting {
 //	}
 
 	public void load(TextureManager tex) {
-		mapSize = 64; //must be a power of 2 (32, 64, 128, etc.)
+		mapSize = 128; //must be a power of 2 (32, 64, 128, etc.)
 		lightMap = Bitmap.createBitmap(mapSize, mapSize, Bitmap.Config.RGB_565);
 
 		nMapColumns = (int) Math.round(Math.pow(2, Math.ceil(Math.log10(room.staticQuads.size()) * Math.log(10) / Math.log(4))));

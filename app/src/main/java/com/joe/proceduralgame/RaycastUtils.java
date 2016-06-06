@@ -5,6 +5,8 @@ import com.joe.proceduralgame.Quad.Type;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import java.util.Collection;
+
 public class RaycastUtils {
 	
 	private class Intersection {
@@ -74,6 +76,7 @@ public class RaycastUtils {
 	 *
 	 * @param resultIntersection an optional float[2] or null to store the quadspace coordinates of an intersection
 	 * @param room the Room whose Quads to search
+	 * @param quads a RaycastDatastructure containing the Quads to query
 	 * @param startX the x coordinate of the origin of the ray
 	 * @param startY the Y coordinate of the origin of the ray
 	 * @param startZ the Z coordinate of the origin of the ray
@@ -83,47 +86,114 @@ public class RaycastUtils {
 	 * @param betweenPointsOnly if true the raycast will ignore quads not in between the start and aim
 	 * @return the closest Quad to the startPoint that is intersected by the ray
 	 */
-	public static final Quad raycast(float[] resultIntersection, Room room, float startX,
-	                                 float startY, float startZ, float aimX, float aimY, float aimZ,
+	public static final Quad raycast(float[] resultIntersection, Room room,
+	                                 RaycastDatastructure quads, float startX, float startY,
+	                                 float startZ, float aimX, float aimY, float aimZ,
 	                                 boolean betweenPointsOnly) {
 		float[] inverseModel = new float[16]; //transform from world space to quad space
 		float[] transformedVecs = new float[8];
 
 		float[] originAndAim = {startX, startY, startZ, 1, aimX, aimY, aimZ, 1};
 
-		float[][] quadModels = room.quadModels;
-		for (int i = 0; i < quadModels.length; i++) {
-			Matrix.invertM(inverseModel, 0, quadModels[i], 0);
+		//Get horizontal unit vector in direction from start to aim
+		float dirX = aimX - startX;
+		float dirZ = aimZ - startZ;
+		double dist = Math.hypot(dirX, dirZ);
+		dirX /= dist;
+		dirZ /= dist;
 
-			Matrix.multiplyMV(transformedVecs, 0, inverseModel, 0, originAndAim, 0);
-			Matrix.multiplyMV(transformedVecs, 4, inverseModel, 0, originAndAim, 4);
+		int currentX = Math.round(startX);
+		int currentZ = Math.round(startZ);
+		while (true) { //Traverse buckets from start to aim
+			int bucketRow = currentZ - room.originz;
+			int bucketCol = currentX - room.originx;
+			if (bucketRow < 0 || bucketRow >= room.length || bucketCol < 0 || bucketCol >= room.width)
+				break; //out of bounds
+			Collection<Quad> bucket = quads.buckets[bucketRow][bucketCol];
 
-			if (betweenPointsOnly) {
-				//start and stop must be on different sides of the quad's plane
-				if (Math.signum(transformedVecs[6]) == Math.signum(transformedVecs[2]))
-					continue;
-			}
+			//Raycast within current bucket
+			for (Quad q : bucket) {
+				float[] quadModel = q.modelMatrix;
 
-			float dz = transformedVecs[6] - transformedVecs[2];
-			if (dz != 0) {
-				float t = -transformedVecs[2] / dz;
-				float dx = transformedVecs[4] - transformedVecs[0];
-				float dy = transformedVecs[5] - transformedVecs[1];
-				float projectedX = transformedVecs[0] + dx * t;
-				float projectedY = transformedVecs[1] + dy * t;
-				if (-.5f <= projectedX && projectedX < .5f && -.5f <= projectedY && projectedY < .5f) {
-					Quad intersectedQuad = room.staticQuads.get(i);
-					if (intersectedQuad.type == Type.DECORATION)
+				Matrix.invertM(inverseModel, 0, quadModel, 0);
+
+				Matrix.multiplyMV(transformedVecs, 0, inverseModel, 0, originAndAim, 0);
+				Matrix.multiplyMV(transformedVecs, 4, inverseModel, 0, originAndAim, 4);
+
+				if (betweenPointsOnly) {
+					//start and stop must be on different sides of the quad's plane
+					if (Math.signum(transformedVecs[6]) == Math.signum(transformedVecs[2]))
 						continue;
+				}
 
-					if (resultIntersection != null) {
-						resultIntersection[0] = projectedX;
-						resultIntersection[1] = projectedY;
+				float dz = transformedVecs[6] - transformedVecs[2];
+				if (dz != 0) {
+					float t = -transformedVecs[2] / dz;
+					float dx = transformedVecs[4] - transformedVecs[0];
+					float dy = transformedVecs[5] - transformedVecs[1];
+					float projectedX = transformedVecs[0] + dx * t;
+					float projectedY = transformedVecs[1] + dy * t;
+					if (-.5f <= projectedX && projectedX < .5f && -.5f <= projectedY && projectedY < .5f) {
+						if (resultIntersection != null) {
+							resultIntersection[0] = projectedX;
+							resultIntersection[1] = projectedY;
+						}
+						return q;
 					}
-					return intersectedQuad;
 				}
 			}
+
+			//The next candidate buckets are adjacent to the current in the direction of the ray
+			int nextHorizontalX = dirX < 0 ? currentX - 1 : currentX + 1;
+			int nextVerticalZ = dirZ < 0 ? currentZ - 1 : currentZ + 1;
+
+			float startToHorX = nextHorizontalX - startX;
+			float startToHorZ = currentZ - startZ;
+			float startToVertX = currentX - startX;
+			float startToVertZ = nextVerticalZ - startZ;
+
+			//Project both candidates onto ray to find the closer.
+			//Use cross product to find distance from ray.
+			float distFromRayToHorNext = dirZ * startToHorX - dirX * startToHorZ;
+			float distFromRayToVertNext = dirZ * startToVertX - dirX * startToVertZ;
+			if (distFromRayToHorNext < distFromRayToVertNext)
+				currentX = nextHorizontalX;
+			else
+				currentZ = nextVerticalZ;
 		}
+
+//		for (int i = 0; i < quadModels.length; i++) {
+//			Matrix.invertM(inverseModel, 0, quadModels[i], 0);
+//
+//			Matrix.multiplyMV(transformedVecs, 0, inverseModel, 0, originAndAim, 0);
+//			Matrix.multiplyMV(transformedVecs, 4, inverseModel, 0, originAndAim, 4);
+//
+//			if (betweenPointsOnly) {
+//				//start and stop must be on different sides of the quad's plane
+//				if (Math.signum(transformedVecs[6]) == Math.signum(transformedVecs[2]))
+//					continue;
+//			}
+//
+//			float dz = transformedVecs[6] - transformedVecs[2];
+//			if (dz != 0) {
+//				float t = -transformedVecs[2] / dz;
+//				float dx = transformedVecs[4] - transformedVecs[0];
+//				float dy = transformedVecs[5] - transformedVecs[1];
+//				float projectedX = transformedVecs[0] + dx * t;
+//				float projectedY = transformedVecs[1] + dy * t;
+//				if (-.5f <= projectedX && projectedX < .5f && -.5f <= projectedY && projectedY < .5f) {
+//					Quad intersectedQuad = room.staticQuads.get(i);
+//					if (intersectedQuad.type == Type.DECORATION)
+//						continue;
+//
+//					if (resultIntersection != null) {
+//						resultIntersection[0] = projectedX;
+//						resultIntersection[1] = projectedY;
+//					}
+//					return intersectedQuad;
+//				}
+//			}
+//		}
 		return null;
 	}
 
