@@ -109,7 +109,7 @@ public class RoomLighting {
 	}
 
 	private void computeLightmap() {
-		final float divByTileSize = 1.0f / mapTileSize;
+		final float divByTileSizeMinus1 = 1.0f / (mapTileSize - 1);
 
 		final int nThreads = 1; //number of threads to distribute task on (at least 1)
 		final Thread masterThread = Thread.currentThread();
@@ -133,8 +133,8 @@ public class RoomLighting {
 						final int minY = mapSize / nMapColumns * (i / nMapColumns);
 						for (int pixelU = 0; pixelU < mapTileSize; pixelU++) {
 							for (int pixelV = 0; pixelV < mapTileSize; pixelV++) {
-								uvLocalPosition[0] = pixelU * divByTileSize - .5f;
-								uvLocalPosition[1] = .5f - pixelV * divByTileSize;
+								uvLocalPosition[0] = pixelU * divByTileSizeMinus1 - .5f;
+								uvLocalPosition[1] = .5f - pixelV * divByTileSizeMinus1;
 								Matrix.multiplyMV(position, 0, quad.modelMatrix, 0, uvLocalPosition, 0);
 
 								int illuminationColor = computeIllumination(position, translatedNormal);
