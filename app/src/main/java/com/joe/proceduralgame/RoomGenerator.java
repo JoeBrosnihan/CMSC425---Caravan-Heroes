@@ -129,6 +129,7 @@ public class RoomGenerator {
 		float[] model = new float[16];
 		Matrix.setIdentityM(model, 0);
 		Matrix.translateM(model, 0, room.originx + col, 0, room.originz + row);
+		Matrix.rotateM(model, 0, 180, 0, 1, 0);
 		Matrix.rotateM(model, 0, 90, 1, 0, 0);
 		Quad floor = Quad.createStaticQuad(Type.FLOOR, model, texture);
 		room.staticQuads.add(floor);

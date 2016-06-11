@@ -68,6 +68,7 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		this.dungeonManager = dungeonManager;
 	}
 
+	private final float[] tempLightmapUV = new float[2];
 	/**
 	 * Renders the game
 	 */
@@ -82,6 +83,9 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 		GLES20.glUniform1i(emissiveHandle, 0); //draw all quads without emission by default
 		int colorMultiplierHandle = GLES20.glGetUniformLocation(program, "uColorMultiplier");
 		GLES20.glUniform4f(colorMultiplierHandle, 1, 1, 1, 1); //draw all quads without color modification by default
+
+		int lightmapUVHandle = GLES20.glGetUniformLocation(program, "uLightmapUV");
+		int lightmapScaleHandle = GLES20.glGetUniformLocation(program, "uLightmapScale");
 
 		//Draw static room geometry
 	    GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -120,13 +124,17 @@ public class DungeonRenderer implements GLSurfaceView.Renderer {
 
 		//Draw edge entities
 	    GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES20.glUniform1f(lightmapScaleHandle, 0.0f);
 	    for (EdgeEntity e : dungeonManager.currentRoom.edgeEntities) {
+		    //TODO get proper lightmap
 	    	e.draw(program, mVPMatrix);
 	    }
 
 		//Draw entities
 		GLES20.glUniform1i(normallessHandle, 1);
 	    for (Entity e : dungeonManager.currentRoom.entities) {
+		    dungeonManager.currentRoom.lighting.getLightmapUVsOfPosition(tempLightmapUV, e.posx, e.posz); //could cache within Entity class
+		    GLES20.glUniform2f(lightmapUVHandle, tempLightmapUV[0], tempLightmapUV[1]);
 	    	e.draw(program, mVPMatrix);
 	    }
 		GLES20.glUniform1i(normallessHandle, 0);

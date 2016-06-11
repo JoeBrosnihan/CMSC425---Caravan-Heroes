@@ -173,6 +173,25 @@ public class RoomLighting {
 		lights.add(light);
 	}
 
+	private final float[] intersection = new float[2];
+	/**
+	 * Gets the lightmap UV coordinates of the point provided projected onto the floor
+	 *
+	 * Sets result[0] = u coordinate and result[1] to v coordinate.
+	 *
+	 * This method is not thread-safe.
+	 *
+	 * @param result a float[2] array that will store the resulting UV coordinates
+	 * @param posX the x coordinate of the point
+	 * @param posZ the y coordinates of the point
+	 */
+	public void getLightmapUVsOfPosition(float[] result, float posX, float posZ) {
+		Quad hit = RaycastUtils.raycast(intersection, room, posX, .5f, posZ, posX, 0.0f, posZ, false);
+		int index = room.staticQuads.indexOf(hit);
+		result[0] = (index % nMapColumns) / (float) nMapColumns + (intersection[0] + .5f) * mapUVScale + mapUVOffset;
+		result[1] = (index / nMapColumns) / (float) nMapColumns + (-intersection[1] + .5f) * mapUVScale + mapUVOffset;
+	}
+
 	public void load(TextureManager tex) {
 		mapSize = 128; //must be a power of 2 (32, 64, 128, etc.)
 		lightMap = Bitmap.createBitmap(mapSize, mapSize, Bitmap.Config.RGB_565);
