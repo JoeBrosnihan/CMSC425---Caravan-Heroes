@@ -68,6 +68,35 @@ public class RaycastUtils {
 	/**
 	 * Finds a quad intersected by the ray from a start point through an aim point
 	 *
+	 * queries all non DECORATION quads in the room.
+	 *
+	 * If a float array of length at least 2 is supplied for result Intersection and if an
+	 * intersection is found, the X and Y coordinates of the intersection in the quad's coordinate
+	 * frame will be stored at index 0 and 1 respectively. The worldspace coordinates of the
+	 * intersection can be retrieved by multiplying the intersected quad's model matrix by the
+	 * float[4] vector, {resultIntersection[0], resultIntersection[1], 0, 1}.
+	 *
+	 * @param resultIntersection an optional float[2] or null to store the quadspace coordinates of an intersection
+	 * @param room the Room whose Quads to search
+	 * @param startX the x coordinate of the origin of the ray
+	 * @param startY the Y coordinate of the origin of the ray
+	 * @param startZ the Z coordinate of the origin of the ray
+	 * @param aimX the x coordinate of a point that the ray will pass through
+	 * @param aimY the y coordinate of a point that the ray will pass through
+	 * @param aimZ the z coordinate of a point that the ray will pass through
+	 * @param betweenPointsOnly if true the raycast will ignore quads not in between the start and aim
+	 * @return the closest Quad to the startPoint that is intersected by the ray
+	 */
+	public static final Quad raycast(float[] resultIntersection, Room room, float startX,
+	                                 float startY, float startZ, float aimX, float aimY, float aimZ,
+	                                 boolean betweenPointsOnly) {
+		return raycast(resultIntersection, room, room.raycastDatastructure, startX, startY, startZ,
+				aimX, aimY, aimZ, betweenPointsOnly);
+	}
+
+	/**
+	 * Finds a quad intersected by the ray from a start point through an aim point
+	 *
 	 * If a float array of length at least 2 is supplied for result Intersection and if an
 	 * intersection is found, the X and Y coordinates of the intersection in the quad's coordinate
 	 * frame will be stored at index 0 and 1 respectively. The worldspace coordinates of the

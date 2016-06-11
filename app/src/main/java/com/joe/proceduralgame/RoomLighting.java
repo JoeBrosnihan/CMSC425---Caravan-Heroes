@@ -64,7 +64,7 @@ public class RoomLighting {
 		this.room = room;
 	}
 
-	private int computeIllumination(RaycastDatastructure datastructure, float[] position, float[] normal) {
+	private int computeIllumination(float[] position, float[] normal) {
 		final float[] sample = new float[6];
 		float r = 0;
 		float g = 0;
@@ -76,8 +76,8 @@ public class RoomLighting {
 			float pointX = position[0] + normal[0] * raycastBias;
 			float pointY = position[1] + normal[1] * raycastBias;
 			float pointZ = position[2] + normal[2] * raycastBias;
-			boolean receivingLight = null == RaycastUtils.raycast(null, room, datastructure, pointX,
-					pointY,	pointZ, sample[0], sample[1], sample[2], true);
+			boolean receivingLight = null == RaycastUtils.raycast(null, room, pointX, pointY,
+					pointZ, sample[0], sample[1], sample[2], true);
 			if (!receivingLight)
 				continue;
 
@@ -115,12 +115,6 @@ public class RoomLighting {
 		final Thread masterThread = Thread.currentThread();
 		nTasksRemaining = nThreads;
 
-		final RaycastDatastructure datastructure = new RaycastDatastructure(room);
-		for (Quad q : room.staticQuads) {
-			if (q.type != Quad.Type.DECORATION)
-				datastructure.add(q);
-		}
-
 		for (int t = 0; t < nThreads; t++) {
 			final int threadNum = t;
 			new Thread() {
@@ -143,18 +137,15 @@ public class RoomLighting {
 								uvLocalPosition[1] = .5f - pixelV * divByTileSize;
 								Matrix.multiplyMV(position, 0, quad.modelMatrix, 0, uvLocalPosition, 0);
 
-								int illuminationColor = computeIllumination(datastructure, position,
-										translatedNormal);
+								int illuminationColor = computeIllumination(position, translatedNormal);
 
 								synchronized (masterThread) {
 									lightMap.setPixel(minX + pixelU, minY + pixelV, illuminationColor);
 								}
-//								System.out.println("Computed Lightmap for U=" + pixelU + " V=" + pixelV + " for Quad i=" + i + " on Thread " + threadNum);
 							}
 						}
 					}
 					synchronized (masterThread) {
-//						System.out.println("Thread " + threadNum + " acquired master thread Lock");
 						nTasksRemaining--;
 						masterThread.notify();
 					}
@@ -169,16 +160,6 @@ public class RoomLighting {
 				} catch (InterruptedException e) {}
 			}
 		}
-//		while (true) {
-//			synchronized (masterThread) {
-//				if (nTasksRemaining == 0)
-//					break;
-//				}
-//			}
-//			try {
-//				masterThread.wait();
-//			} catch (InterruptedException e) {
-//		}
 	}
 
 	/**
@@ -191,22 +172,6 @@ public class RoomLighting {
 	public void addStaticLight(StaticLightBody light) {
 		lights.add(light);
 	}
-
-//	private void computeLightmap() {
-//		for (int i = 0; i < room.staticQuads.size(); i++) {
-//			final int minX = mapSize / nMapColumns * (i % nMapColumns);
-//			final int minY = mapSize / nMapColumns * (i / nMapColumns);
-//			for (int pixelX = minX; pixelX < minX + mapTileSize; pixelX++) {
-//				for (int pixelY = minY; pixelY < minY + mapTileSize; pixelY++) {
-//					lightMap.setPixel(pixelX, pixelY, Color.rgb(200, 200, 200));
-//					lightMap.setPixel(minX, pixelY, Color.rgb(0, 0, 200));
-//					lightMap.setPixel(minX + mapTileSize - 1, pixelY, Color.rgb(200, 200, 0));
-//				}
-//				lightMap.setPixel(pixelX, minY, Color.rgb(200, 0, 0));
-//				lightMap.setPixel(pixelX, minY + mapTileSize - 1, Color.rgb(0, 200, 0));
-//			}
-//		}
-//	}
 
 	public void load(TextureManager tex) {
 		mapSize = 128; //must be a power of 2 (32, 64, 128, etc.)

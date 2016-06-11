@@ -109,14 +109,13 @@ public class RoomGenerator {
 						if (room.edges[room.edgeIndexAt(posx, posz)] == null) {
 							if (adjRow < 0 || adjRow >= room.length || adjCol < 0 || adjCol >= room.width) {
 								addWallQuad(room, row, col, i, R.drawable.dungeonwalltile3);
-								if (rand.nextFloat() < .1f)
+								if (rand.nextFloat() < .2f)
 									addTorch(room, row, col, i, R.drawable.objtorch2);
-									///
 								continue;
 							}
 							if (room.grid[adjRow][adjCol] == SolidBlock.singleton) {
 								addWallQuad(room, row, col, i, R.drawable.dungeonwalltile2);
-								if (rand.nextFloat() < .1f)
+								if (rand.nextFloat() < .2f)
 									addTorch(room, row, col, i, R.drawable.objtorch2);
 							}
 						}

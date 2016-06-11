@@ -37,6 +37,8 @@ public class Room {
 
 	List<DamageDisplay> damageDisplays = new ArrayList<DamageDisplay>();
 
+	public RaycastDatastructure raycastDatastructure; //Does not contain any decorations
+
 	////// static geometry //////
 	// sorted first by texture then by uv patch
 	float[][] quadModels; // model matrix of each quad
@@ -128,9 +130,14 @@ public class Room {
 	public void load(TextureManager tex) throws NoFreeTextureUnitsExcpetion { //TODO unload rooms
 		lighting = new RoomLighting(this);
 		generator.load(this);
-		DungeonRenderer.catchGLError();
+
+		raycastDatastructure = new RaycastDatastructure(this);
+		for (Quad q : staticQuads) {
+			if (q.type != Quad.Type.DECORATION)
+				raycastDatastructure.add(q);
+		}
+
 		loadStaticGeometry(tex);
-		DungeonRenderer.catchGLError();
 		for (Entity e : entities) {
 			e.graphicLoad(tex);
 			DungeonRenderer.catchGLError();
@@ -139,6 +146,8 @@ public class Room {
 			e.load(tex);
 			DungeonRenderer.catchGLError();
 		}
+
+
 		lighting.load(tex);
 		return;
 	}
